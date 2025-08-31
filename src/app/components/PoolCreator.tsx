@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import confetti from 'canvas-confetti';
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
@@ -9,7 +10,6 @@ import {
   Connection,
   Keypair,
   PublicKey,
-  sendAndConfirmTransaction,
   clusterApiUrl,
   SendTransactionError,
 } from "@solana/web3.js";
@@ -18,7 +18,6 @@ import {
   DynamicBondingCurveClient,
   buildCurve,
 } from "@meteora-ag/dynamic-bonding-curve-sdk";
-import { BN } from "bn.js";
 
 interface PoolCreationResult {
   configAddress: string;
@@ -58,7 +57,6 @@ export default function PoolCreator() {
 
 function PoolCreatorContent() {
   const { connected, publicKey, signTransaction } = useWallet();
-  const { connection } = useConnection();
   const [network, setNetwork] = useState<WalletAdapterNetwork>(WalletAdapterNetwork.Devnet);
   const [formData, setFormData] = useState({
     tokenName: "",
@@ -69,12 +67,12 @@ function PoolCreatorContent() {
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [generatedMetadataUri, setGeneratedMetadataUri] = useState<string>("");
   const [isCreatingConfig, setIsCreatingConfig] = useState(false);
   const [isCreatingPool, setIsCreatingPool] = useState(false);
   const [result, setResult] = useState<PoolCreationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   // Handle client-side mounting to prevent hydration errors
   useEffect(() => {
@@ -176,7 +174,6 @@ function PoolCreatorContent() {
   };
 
   const generateMetadata = async () => {
-    setIsUploadingImage(true);
     try {
       let imageUrl = "";
       
@@ -207,12 +204,10 @@ function PoolCreatorContent() {
       console.error('Error generating metadata:', error);
       setError(`Failed to generate metadata: ${error}`);
       return null;
-    } finally {
-      setIsUploadingImage(false);
     }
   };
 
-  const saveTokenToDatabase = async (tokenData: any) => {
+  const saveTokenToDatabase = async (tokenData: PoolCreationResult) => {
     try {
       const response = await fetch('/api/tokens', {
         method: 'POST',
@@ -982,7 +977,7 @@ function PoolCreatorContent() {
                       onChange={handleInputChange}
                       rows={4}
                       className="w-full px-6 py-5 bg-[#0D0F1A]/80 border border-[#2A2F3C] rounded-2xl focus:ring-4 focus:ring-[#7B61FF]/20 focus:border-[#7B61FF] text-[#FFFFFF] transition-all duration-300 backdrop-blur-sm shadow-[0_4px_12px_rgba(0,0,0,0.3)] hover:border-[#7B61FF]/50 placeholder-[#A0AEC0] resize-none"
-                      placeholder="Describe your token's purpose, utility, and unique features..."
+                      placeholder="Describe your token&apos;s purpose, utility, and unique features..."
                       required
                     />
                   </div>
@@ -990,7 +985,7 @@ function PoolCreatorContent() {
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    A compelling description helps investors understand your token's value
+                    A compelling description helps investors understand your token&apos;s value
                   </p>
                 </div>
 
@@ -1018,7 +1013,7 @@ function PoolCreatorContent() {
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Optional: Link to your project's official website or documentation
+                    Optional: Link to your project&apos;s official website or documentation
                   </p>
                 </div>
 
@@ -1040,9 +1035,11 @@ function PoolCreatorContent() {
                       className="w-full h-32 border-2 border-dashed border-[#2A2F3C] rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-[#00E6A8]/50 transition-colors bg-[#0D0F1A]/80 backdrop-blur-sm"
                     >
                       {imagePreview ? (
-                        <img
+                        <Image
                           src={imagePreview}
                           alt="Preview"
+                          width={80}
+                          height={80}
                           className="w-20 h-20 object-cover rounded-xl"
                         />
                       ) : (
@@ -1213,3 +1210,4 @@ function PoolCreatorContent() {
     </div>
   );
 }
+

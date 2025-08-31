@@ -1,11 +1,10 @@
-import { Connection, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 
 /**
  * Get pool address from config address using the bonding curve client
  */
 export async function getPoolAddressFromConfig(configAddress: string): Promise<string> {
   try {
-    const connection = new Connection("https://api.devnet.solana.com", "confirmed");
     // This is a placeholder - you would need to implement the actual pool derivation logic
     // based on the Meteora bonding curve SDK
     console.log("Getting pool address for config:", configAddress);

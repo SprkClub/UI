@@ -4,16 +4,21 @@ import { MongoClient } from 'mongodb';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const MONGODB_DB = process.env.MONGODB_DB || 'launchpad';
 
+interface GlobalMongo {
+  _mongoClientPromise?: Promise<MongoClient>;
+}
+
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 if (process.env.NODE_ENV === 'development') {
   // In development mode, use a global variable so the MongoClient is not constantly re-initialized
-  if (!(global as any)._mongoClientPromise) {
+  const globalWithMongo = global as GlobalMongo;
+  if (!globalWithMongo._mongoClientPromise) {
     client = new MongoClient(MONGODB_URI);
-    (global as any)._mongoClientPromise = client.connect();
+    globalWithMongo._mongoClientPromise = client.connect();
   }
-  clientPromise = (global as any)._mongoClientPromise;
+  clientPromise = globalWithMongo._mongoClientPromise;
 } else {
   // In production mode, it's best to not use a global variable
   client = new MongoClient(MONGODB_URI);
@@ -42,9 +47,25 @@ export async function GET(request: NextRequest) {
   }
 }
 
+interface TokenData {
+  configAddress: string;
+  poolAddress?: string;
+  poolTransactionSignature?: string;
+  configTransactionSignature: string;
+  userWallet?: string;
+  network?: string;
+  metadata?: {
+    name: string;
+    symbol: string;
+    description: string;
+    image?: string;
+    externalUrl?: string;
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const tokenData = await request.json();
+    const tokenData: TokenData = await request.json();
     
     const client = await clientPromise;
     const db = client.db(MONGODB_DB);
