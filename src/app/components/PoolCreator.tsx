@@ -27,9 +27,36 @@ interface PoolCreationResult {
 }
 
 export default function PoolCreator() {
+  const [mounted, setMounted] = useState(false);
+
+  // Handle client-side mounting to prevent hydration errors
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Prevent hydration errors by not rendering until mounted
+  if (!mounted) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⏳</div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Loading...
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            Initializing wallet connection
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return <PoolCreatorContent />;
+}
+
+function PoolCreatorContent() {
   const { connected, publicKey, signTransaction } = useWallet();
   const { connection } = useConnection();
-  const [mounted, setMounted] = useState(false);
   const [network, setNetwork] = useState<WalletAdapterNetwork>(WalletAdapterNetwork.Devnet);
   const [formData, setFormData] = useState({
     tokenName: "",
@@ -41,11 +68,6 @@ export default function PoolCreator() {
   const [isCreatingPool, setIsCreatingPool] = useState(false);
   const [result, setResult] = useState<PoolCreationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Handle client-side mounting to prevent hydration errors
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -268,23 +290,6 @@ export default function PoolCreator() {
       configTransactionSignature,
     });
   };
-
-  // Prevent hydration errors by not rendering until mounted
-  if (!mounted) {
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
-        <div className="text-center">
-          <div className="text-6xl mb-4">⏳</div>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Loading...
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400">
-            Initializing wallet connection
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   if (!connected) {
     return (
