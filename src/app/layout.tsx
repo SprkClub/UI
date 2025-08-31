@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Solana Pool Launchpad",
+  title: "Sparkclub.fun Launchpad",
   description: "Create bonding curve pools on Solana with Phantom wallet",
 };
 
