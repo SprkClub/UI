@@ -10,7 +10,7 @@ import three from '../../../public/3.png'
 import four from '../../../public/4.png'
 
 export default function CreatePage() {
-  return (
+  return ( 
     <WalletProvider>
       <div className="min-h-screen relative">
         {/* Positioned Shape Images */}
