@@ -1,21 +1,24 @@
-"use client";
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
 export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace('/create');
-  }, [router]);
-
   return (
-    <div className="min-h-screen w-full bg-black flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-16 h-16 border-4 border-[rgb(215,231,40)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-white text-lg">Redirecting to Pool Creator...</p>
-      </div>
+    <div className="min-h-screen w-full overflow-hidden">
+      <iframe 
+        src="https://sprkclub-fun.vercel.app/"
+        className="w-full h-screen border-0"
+        style={{
+          width: '100vw',
+          height: '100vh',
+          border: 'none',
+          margin: 0,
+          padding: 0,
+          overflow: 'hidden',
+          userSelect: 'none',
+          pointerEvents: 'auto'
+        }}
+        title="SprkClub.Fun Landing Page"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+        scrolling="no"
+        allowFullScreen={false}
+      />
     </div>
   );
 }
