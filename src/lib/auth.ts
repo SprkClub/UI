@@ -50,7 +50,8 @@ export const authOptions: NextAuthOptions = {
         token.uid = user.id;
         // Store Twitter username from profile for Twitter v2 API
         if (account.provider === 'twitter' && profile) {
-          token.username = profile.username || profile.data?.username;
+          const twitterProfile = profile as any;
+          token.username = twitterProfile.username || twitterProfile.data?.username;
         }
       }
       return token;
