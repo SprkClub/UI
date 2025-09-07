@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface UserData {
   _id: string;
@@ -464,7 +465,7 @@ export default function AdminPage() {
                   ].map((filter) => (
                     <button
                       key={filter.key}
-                      onClick={() => setTokensFilter(filter.key as any)}
+                      onClick={() => setTokensFilter(filter.key as 'all' | 'pending' | 'approved' | 'featured')}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                         tokensFilter === filter.key
                           ? 'bg-[rgb(215,231,40)] text-black'

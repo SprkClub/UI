@@ -28,7 +28,7 @@ if (process.env.NODE_ENV === 'development') {
 // Core admins (hardcoded)
 const CORE_ADMINS = ['soumalyapaul19', 'iathulnambiar'];
 
-async function checkAdminAccess(session: any): Promise<boolean> {
+async function checkAdminAccess(session: { user?: { username?: string } }): Promise<boolean> {
   if (!session?.user?.username) return false;
   
   const username = session.user.username;
@@ -104,7 +104,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { tokenId, action, value } = await request.json();
+    const { tokenId, action } = await request.json();
     
     if (!tokenId || !action) {
       return NextResponse.json(
