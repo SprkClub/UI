@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
@@ -15,19 +15,7 @@ export default function ReferralPage() {
   const [processing, setProcessing] = useState(false);
   const [processed, setProcessed] = useState(false);
 
-  useEffect(() => {
-    if (status === "loading") return;
-
-    // If user is already logged in, process the referral
-    if (session?.user?.username) {
-      processReferral();
-    } else {
-      // Just validate the referral code for display
-      validateReferralCode();
-    }
-  }, [session, status, code]);
-
-  const validateReferralCode = async () => {
+  const validateReferralCode = useCallback(async () => {
     try {
       // We'll create a separate endpoint to validate codes without processing
       const response = await fetch(`/api/referral/validate?code=${code}`);
@@ -42,9 +30,9 @@ export default function ReferralPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [code]);
 
-  const processReferral = async () => {
+  const processReferral = useCallback(async () => {
     setProcessing(true);
     try {
       const response = await fetch('/api/referral', {
@@ -74,7 +62,19 @@ export default function ReferralPage() {
       setProcessing(false);
       setLoading(false);
     }
-  };
+  }, [router, code]);
+
+  useEffect(() => {
+    if (status === "loading") return;
+
+    // If user is already logged in, process the referral
+    if (session?.user?.username) {
+      processReferral();
+    } else {
+      // Just validate the referral code for display
+      validateReferralCode();
+    }
+  }, [session, status, code, processReferral, validateReferralCode]);
 
   const handleSignIn = async () => {
     // Store referral code in localStorage to process after sign in

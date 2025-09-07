@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -90,17 +90,6 @@ export default function AdminPage() {
   const [tokensFilter, setTokensFilter] = useState<'all' | 'pending' | 'approved' | 'featured'>('pending');
   const [activeTab, setActiveTab] = useState<'overview' | 'tokens' | 'users' | 'referrals'>('overview');
 
-  useEffect(() => {
-    if (status === "loading") return;
-    
-    if (!session) {
-      router.push('/auth/signin');
-      return;
-    }
-
-    fetchAdminData();
-  }, [session, status, router, tokensFilter]);
-
   const checkAdminStatus = async () => {
     try {
       const response = await fetch('/api/admin/manage');
@@ -117,7 +106,7 @@ export default function AdminPage() {
     }
   };
 
-  const fetchAdminData = async () => {
+  const fetchAdminData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -155,7 +144,18 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tokensFilter]);
+
+  useEffect(() => {
+    if (status === "loading") return;
+    
+    if (!session) {
+      router.push('/auth/signin');
+      return;
+    }
+
+    fetchAdminData();
+  }, [session, status, router, tokensFilter, fetchAdminData]);
 
   const addAdmin = async () => {
     if (!newAdminInput.trim()) return;
@@ -345,7 +345,7 @@ export default function AdminPage() {
               ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key as any)}
+                  onClick={() => setActiveTab(tab.key as 'overview' | 'tokens' | 'referrals' | 'users')}
                   className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.key
                       ? 'border-[rgb(215,231,40)] text-[rgb(215,231,40)]'

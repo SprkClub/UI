@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 
 interface ReferredUser {
   username: string;
@@ -232,7 +231,7 @@ export default function ReferralsPage() {
             </div>
           ) : (
             <div className="divide-y divide-gray-800">
-              {referralData.referredUsers.map((user, index) => (
+              {referralData.referredUsers.map((user) => (
                 <div key={user.userId} className="p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-4">

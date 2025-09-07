@@ -153,24 +153,43 @@ function TokenModal({ token, isOpen, onClose }: TokenModalProps) {
 
           {/* Action Buttons */}
           <div className="flex gap-3 mt-6 pt-6 border-t border-gray-800">
+            {token.poolAddress && (
+              <>
+                <a
+                  href={`https://raydium.io/swap/?inputMint=sol&outputMint=${token.configAddress}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-[rgb(215,231,40)] text-black py-3 px-4 rounded-xl font-semibold hover:bg-[rgb(215,231,40)]/90 transition-colors text-center flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                  Buy on Raydium
+                </a>
+                <a
+                  href={`https://jup.ag/swap/SOL-${token.configAddress}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-colors text-center flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  </svg>
+                  Buy on Jupiter
+                </a>
+              </>
+            )}
             <a
               href={`https://solscan.io/account/${token.configAddress}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 bg-[rgb(215,231,40)] text-black py-3 px-4 rounded-xl font-semibold hover:bg-[rgb(215,231,40)]/90 transition-colors text-center"
+              className={`${token.poolAddress ? 'flex-1' : 'flex-2'} bg-gray-800 text-white py-3 px-4 rounded-xl font-semibold hover:bg-gray-700 transition-colors text-center flex items-center justify-center gap-2`}
             >
-              View on Solscan
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              View Details
             </a>
-            {token.poolAddress && (
-              <a
-                href={`https://solscan.io/account/${token.poolAddress}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 bg-gray-800 text-white py-3 px-4 rounded-xl font-semibold hover:bg-gray-700 transition-colors text-center"
-              >
-                View Pool
-              </a>
-            )}
           </div>
         </div>
       </div>
@@ -375,12 +394,33 @@ export default function FeaturedTokens() {
                     </p>
                   </div>
 
-                  {/* Hover Effect */}
+                  {/* Quick Actions */}
                   <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="h-px bg-gradient-to-r from-transparent via-[rgb(215,231,40)]/50 to-transparent"></div>
-                    <p className="text-center text-[rgb(215,231,40)] text-xs mt-2 font-medium">
-                      Click to view details
-                    </p>
+                    <div className="h-px bg-gradient-to-r from-transparent via-[rgb(215,231,40)]/50 to-transparent mb-3"></div>
+                    
+                    {token.poolAddress ? (
+                      <div className="flex gap-2 mb-2">
+                        <a
+                          href={`https://raydium.io/swap/?inputMint=sol&outputMint=${token.configAddress}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 bg-[rgb(215,231,40)] text-black py-2 px-3 rounded-lg text-xs font-semibold hover:bg-[rgb(215,231,40)]/90 transition-colors text-center"
+                        >
+                          Buy
+                        </a>
+                        <button
+                          onClick={() => setSelectedToken(token)}
+                          className="flex-1 bg-gray-800 text-white py-2 px-3 rounded-lg text-xs font-semibold hover:bg-gray-700 transition-colors"
+                        >
+                          Details
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-center text-[rgb(215,231,40)] text-xs font-medium">
+                        Click to view details
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}

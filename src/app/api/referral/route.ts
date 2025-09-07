@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import crypto from 'crypto';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
@@ -33,7 +33,7 @@ function generateReferralCode(username: string): string {
 }
 
 // GET - Get user's referral data and referred users
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     
@@ -69,13 +69,13 @@ export async function GET(request: NextRequest) {
         updatedAt: new Date()
       };
       
-      await referralsCollection.insertOne(newReferral);
-      referralData = newReferral;
+      const result = await referralsCollection.insertOne(newReferral);
+      referralData = await referralsCollection.findOne({ _id: result.insertedId });
     }
 
     // Get referred users with their token purchase data
     const referredUsers = [];
-    for (const referredUser of referralData.referredUsers || []) {
+    for (const referredUser of referralData?.referredUsers || []) {
       // Get token purchases by this referred user
       const userTokens = await tokensCollection.find({
         'twitterAuth.username': referredUser.username
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
       referralData: {
         ...referralData,
         referredUsers,
-        referralLink: `${process.env.NEXTAUTH_URL}/ref/${referralData.referralCode}`
+        referralLink: `${process.env.NEXTAUTH_URL}/ref/${referralData?.referralCode}`
       }
     });
   } catch (error) {
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
         $push: { referredUsers: newReferredUser },
         $inc: { totalReferred: 1 },
         $set: { updatedAt: new Date() }
-      }
+      } as Record<string, unknown>
     );
 
     return NextResponse.json({

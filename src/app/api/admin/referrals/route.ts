@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { MongoClient } from 'mongodb';
@@ -53,7 +53,7 @@ async function checkAdminAccess(session: { user?: { username?: string } }): Prom
 }
 
 // GET - Fetch all referral data for admin view
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate summary statistics
     const totalReferrers = enhancedReferrals.length;
-    const totalReferredUsers = enhancedReferrals.reduce((acc, r) => acc + r.totalReferred, 0);
+    const totalReferredUsers = enhancedReferrals.reduce((acc, r) => acc + (r.referredUsers?.length || 0), 0);
     const totalTokensFromReferrals = enhancedReferrals.reduce((acc, r) => acc + r.totalTokensCreated, 0);
     
     return NextResponse.json({ 
