@@ -16,9 +16,12 @@ const clientPromise = client.connect().catch(() => {
 });
 
 export const authOptions: NextAuthOptions = {
-  adapter: MongoDBAdapter(clientPromise, {
-    databaseName: "launchpad"
-  }),
+  // adapter: MongoDBAdapter(clientPromise, {
+  //   databaseName: "launchpad"
+  // }),
+  session: {
+    strategy: "jwt",
+  },
   providers: [
     TwitterProvider({
       clientId: process.env.TWITTER_CLIENT_ID!,
@@ -34,22 +37,20 @@ export const authOptions: NextAuthOptions = {
       if (new URL(url).origin === baseUrl) return url;
       return baseUrl;
     },
-    async session({ session, user, token }) {
+    async session({ session, token }) {
       if (session?.user) {
-        session.user.id = user.id;
-        // Store Twitter username for admin check from token or user
-        session.user.username = token.username as string || user.username;
+        session.user.id = token.uid as string;
+        // Store Twitter username from token
+        session.user.username = token.username as string;
       }
       return session;
     },
     async jwt({ user, token, account, profile }) {
-      if (user) {
+      if (account && user) {
         token.uid = user.id;
-        // Store Twitter username from profile
-        if (account?.provider === 'twitter' && profile) {
-          const twitterProfile = profile as Record<string, unknown>;
-          const profileData = (twitterProfile.data as Record<string, unknown>) || twitterProfile;
-          token.username = (profileData.username as string) || (twitterProfile.username as string);
+        // Store Twitter username from profile for Twitter v2 API
+        if (account.provider === 'twitter' && profile) {
+          token.username = profile.username || profile.data?.username;
         }
       }
       return token;
