@@ -22,10 +22,16 @@ export default function SignIn() {
   const handleTwitterSignIn = async () => {
     setIsLoading(true);
     try {
-      await signIn('twitter', { 
+      const result = await signIn('twitter', { 
         callbackUrl: '/create',
-        redirect: true 
+        redirect: false 
       });
+      if (result?.error) {
+        console.error('Sign in error:', result.error);
+        setIsLoading(false);
+      } else if (result?.url) {
+        window.location.href = result.url;
+      }
     } catch (error) {
       console.error('Sign in error:', error);
       setIsLoading(false);
