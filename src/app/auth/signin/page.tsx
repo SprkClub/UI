@@ -13,6 +13,24 @@ export default function SignIn() {
     const checkSession = async () => {
       const session = await getSession();
       if (session) {
+        // Check for pending referral code
+        const pendingReferralCode = localStorage.getItem('pendingReferralCode');
+        if (pendingReferralCode) {
+          localStorage.removeItem('pendingReferralCode');
+          
+          // Process the referral
+          try {
+            await fetch('/api/referral', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ referralCode: pendingReferralCode }),
+            });
+          } catch (error) {
+            console.error('Error processing pending referral:', error);
+          }
+        }
         router.push('/create');
       }
     };

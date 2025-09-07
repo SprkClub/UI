@@ -75,7 +75,8 @@ export async function POST(request: NextRequest) {
     
     const client = await clientPromise;
     const db = client.db(MONGODB_DB);
-    const collection = db.collection('tokens');
+    const tokensCollection = db.collection('tokens');
+    const referralsCollection = db.collection('referrals');
     
     // Add additional fields
     const document = {
@@ -84,7 +85,36 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date(),
     };
     
-    const result = await collection.insertOne(document);
+    const result = await tokensCollection.insertOne(document);
+    
+    // Update referral data if this user was referred
+    if (tokenData.twitterAuth?.username) {
+      try {
+        // Find any referral record where this user was referred
+        const referralRecord = await referralsCollection.findOne({
+          'referredUsers.username': tokenData.twitterAuth.username
+        });
+        
+        if (referralRecord) {
+          // Update the specific referred user's token count
+          await referralsCollection.updateOne(
+            { 
+              _id: referralRecord._id,
+              'referredUsers.username': tokenData.twitterAuth.username 
+            },
+            { 
+              $inc: { 'referredUsers.$.tokensPurchased': 1 },
+              $set: { updatedAt: new Date() }
+            }
+          );
+          
+          console.log(`Updated referral tracking for user ${tokenData.twitterAuth.username}`);
+        }
+      } catch (referralError) {
+        console.error('Error updating referral data:', referralError);
+        // Don't fail token creation if referral update fails
+      }
+    }
     
     return NextResponse.json({ 
       success: true,

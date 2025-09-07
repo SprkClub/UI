@@ -239,6 +239,12 @@ export default function FeaturedTokens() {
             
             <div className="flex items-center gap-4">
               <Link
+                href="/referrals"
+                className="text-gray-400 hover:text-white transition-colors px-4 py-2 rounded-lg hover:bg-gray-800"
+              >
+                Referrals
+              </Link>
+              <Link
                 href="/create"
                 className="text-gray-400 hover:text-white transition-colors px-4 py-2 rounded-lg hover:bg-gray-800"
               >
