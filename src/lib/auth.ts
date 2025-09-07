@@ -34,17 +34,23 @@ export const authOptions: NextAuthOptions = {
       if (new URL(url).origin === baseUrl) return url;
       return baseUrl;
     },
-    async session({ session, user }) {
+    async session({ session, user, token }) {
       if (session?.user) {
         session.user.id = user.id;
-        // Store Twitter username for admin check
-        session.user.username = user.username;
+        // Store Twitter username for admin check from token or user
+        session.user.username = token.username as string || user.username;
       }
       return session;
     },
-    async jwt({ user, token }) {
+    async jwt({ user, token, account, profile }) {
       if (user) {
         token.uid = user.id;
+        // Store Twitter username from profile
+        if (account?.provider === 'twitter' && profile) {
+          const twitterProfile = profile as Record<string, unknown>;
+          const profileData = (twitterProfile.data as Record<string, unknown>) || twitterProfile;
+          token.username = (profileData.username as string) || (twitterProfile.username as string);
+        }
       }
       return token;
     },

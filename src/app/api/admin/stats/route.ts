@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { isAdmin } from '@/lib/admin';
 import { MongoClient } from 'mongodb';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
@@ -9,7 +10,6 @@ const MONGODB_DB = process.env.MONGODB_DB || 'sprkclub';
 if (!MONGODB_URI || typeof MONGODB_URI !== 'string') {
   throw new Error('MONGODB_URI environment variable is not defined or invalid');
 }
-const ADMIN_USERNAMES = ['iathulnambiar', 'elonmusk'];
 
 interface GlobalMongo {
   _mongoClientPromise?: Promise<MongoClient>;
@@ -44,8 +44,8 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const isAdmin = ADMIN_USERNAMES.includes(session.user.username.toLowerCase());
-    if (!isAdmin) {
+    const adminCheck = await isAdmin(session.user.username);
+    if (!adminCheck) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 

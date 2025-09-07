@@ -21,7 +21,6 @@ interface TokenStats {
   tokensThisWeek: number;
 }
 
-const ADMIN_USERNAMES = ['iathulnambiar', 'elonmusk'];
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -29,8 +28,10 @@ export default function AdminPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [stats, setStats] = useState<TokenStats | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const isAdmin = session?.user?.username && ADMIN_USERNAMES.includes(session.user.username.toLowerCase());
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [admins, setAdmins] = useState<string[]>([]);
+  const [newAdminInput, setNewAdminInput] = useState('');
+  const [adminLoading, setAdminLoading] = useState(false);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -40,18 +41,32 @@ export default function AdminPage() {
       return;
     }
 
-    if (!isAdmin) {
-      router.push('/create');
-      return;
-    }
-
     // Fetch admin data
     fetchAdminData();
-  }, [session, status, router, isAdmin]);
+  }, [session, status, router]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const checkAdminStatus = async () => {
+    try {
+      const response = await fetch('/api/admin/manage');
+      if (response.ok) {
+        const data = await response.json();
+        setIsAdmin(true);
+        setAdmins(data.admins || []);
+      } else {
+        setIsAdmin(false);
+      }
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      setIsAdmin(false);
+    }
+  };
 
   const fetchAdminData = async () => {
     try {
       setLoading(true);
+      
+      // Check admin status first
+      await checkAdminStatus();
       
       // Fetch users and stats in parallel
       const [usersResponse, statsResponse] = await Promise.all([
@@ -72,6 +87,62 @@ export default function AdminPage() {
       console.error('Error fetching admin data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const addAdmin = async () => {
+    if (!newAdminInput.trim()) return;
+    
+    setAdminLoading(true);
+    try {
+      const response = await fetch('/api/admin/manage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ input: newAdminInput.trim() }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setAdmins(prev => [...prev, data.username]);
+        setNewAdminInput('');
+        alert('Admin added successfully!');
+      } else {
+        alert(data.error || 'Failed to add admin');
+      }
+    } catch (error) {
+      console.error('Error adding admin:', error);
+      alert('Failed to add admin');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const removeAdmin = async (username: string) => {
+    if (!confirm(`Remove ${username} as admin?`)) return;
+    
+    try {
+      const response = await fetch('/api/admin/manage', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setAdmins(prev => prev.filter(admin => admin !== username));
+        alert('Admin removed successfully!');
+      } else {
+        alert(data.error || 'Failed to remove admin');
+      }
+    } catch (error) {
+      console.error('Error removing admin:', error);
+      alert('Failed to remove admin');
     }
   };
 
@@ -206,6 +277,84 @@ export default function AdminPage() {
                 </div>
               </div>
             )}
+
+            {/* Admin Management */}
+            <div className="bg-black/90 backdrop-blur-xl border border-gray-800 rounded-2xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-800">
+                <h2 className="text-xl font-bold text-white">Admin Management</h2>
+                <p className="text-sm text-gray-400">Manage admin access for the platform</p>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                {/* Add Admin */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-gray-300">Add New Admin</label>
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      value={newAdminInput}
+                      onChange={(e) => setNewAdminInput(e.target.value)}
+                      placeholder="Enter X URL (https://x.com/username) or @username"
+                      className="flex-1 bg-gray-900/50 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-[rgb(215,231,40)] focus:ring-1 focus:ring-[rgb(215,231,40)] focus:outline-none"
+                      onKeyDown={(e) => e.key === 'Enter' && addAdmin()}
+                    />
+                    <button
+                      onClick={addAdmin}
+                      disabled={adminLoading || !newAdminInput.trim()}
+                      className="px-6 py-3 bg-[rgb(215,231,40)] text-black font-medium rounded-xl hover:bg-[rgb(215,231,40)]/90 focus:outline-none focus:ring-2 focus:ring-[rgb(215,231,40)]/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {adminLoading ? 'Adding...' : 'Add Admin'}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Supports: https://x.com/username, https://twitter.com/username, @username, or just username
+                  </p>
+                </div>
+
+                {/* Current Admins */}
+                <div className="space-y-3">
+                  <label className="text-sm font-medium text-gray-300">Current Admins</label>
+                  <div className="space-y-2">
+                    {/* Core Admins */}
+                    <div className="flex items-center justify-between p-3 bg-gray-900/30 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-[rgb(215,231,40)] rounded-full"></div>
+                        <span className="text-white">@soumalyapaul19</span>
+                        <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">Core Admin</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-900/30 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-[rgb(215,231,40)] rounded-full"></div>
+                        <span className="text-white">@iathulnambiar</span>
+                        <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">Core Admin</span>
+                      </div>
+                    </div>
+                    
+                    {/* Database Admins */}
+                    {admins.filter(admin => !['soumalyapaul19', 'iathulnambiar'].includes(admin)).map((admin) => (
+                      <div key={admin} className="flex items-center justify-between p-3 bg-gray-900/30 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                          <span className="text-white">@{admin}</span>
+                          <span className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">Added Admin</span>
+                        </div>
+                        <button
+                          onClick={() => removeAdmin(admin)}
+                          className="text-red-400 hover:text-red-300 text-sm px-3 py-1 rounded hover:bg-red-900/20"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                    
+                    {admins.filter(admin => !['soumalyapaul19', 'iathulnambiar'].includes(admin)).length === 0 && (
+                      <p className="text-gray-500 text-sm italic p-3">No additional admins added</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Users Table */}
             <div className="bg-black/90 backdrop-blur-xl border border-gray-800 rounded-2xl overflow-hidden">
