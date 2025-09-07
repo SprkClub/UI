@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface UserData {
   _id: string;
@@ -95,7 +96,7 @@ export default function AdminPage() {
         <div className="text-center">
           <div className="text-6xl mb-4">🚫</div>
           <h1 className="text-2xl font-bold text-white mb-2">Access Denied</h1>
-          <p className="text-gray-400">You don't have permission to access this page</p>
+          <p className="text-gray-400">You don&apos;t have permission to access this page</p>
         </div>
       </div>
     );
@@ -227,9 +228,11 @@ export default function AdminPage() {
                       <tr key={user._id} className="hover:bg-gray-900/30">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
-                            <img
+                            <Image
                               src={user.image || '/default-avatar.png'}
                               alt={user.name}
+                              width={32}
+                              height={32}
                               className="w-8 h-8 rounded-full"
                             />
                             <div>

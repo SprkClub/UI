@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { MongoClient } from 'mongodb';
@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === 'development') {
   clientPromise = client.connect();
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Check admin authentication
     const session = await getServerSession(authOptions);
