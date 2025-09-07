@@ -1,24 +1,7 @@
 import { NextAuthOptions } from "next-auth";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import TwitterProvider from "next-auth/providers/twitter";
-import { MongoClient } from "mongodb";
-
-const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-
-if (!mongoUri || typeof mongoUri !== 'string') {
-  console.warn('MONGODB_URI not available during build');
-}
-
-const client = new MongoClient(mongoUri);
-const clientPromise = client.connect().catch(() => {
-  // Fail gracefully during build time
-  return Promise.resolve(client);
-});
 
 export const authOptions: NextAuthOptions = {
-  // adapter: MongoDBAdapter(clientPromise, {
-  //   databaseName: "launchpad"
-  // }),
   session: {
     strategy: "jwt",
   },
@@ -50,8 +33,9 @@ export const authOptions: NextAuthOptions = {
         token.uid = user.id;
         // Store Twitter username from profile for Twitter v2 API
         if (account.provider === 'twitter' && profile) {
-          const twitterProfile = profile as any;
-          token.username = twitterProfile.username || twitterProfile.data?.username;
+          const twitterProfile = profile as Record<string, unknown>;
+          const profileData = (twitterProfile.data as Record<string, unknown>) || twitterProfile;
+          token.username = (profileData.username as string) || (twitterProfile.username as string);
         }
       }
       return token;
