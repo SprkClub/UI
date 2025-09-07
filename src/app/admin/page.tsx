@@ -21,7 +21,7 @@ interface TokenStats {
   tokensThisWeek: number;
 }
 
-const ADMIN_USERNAMES = ['athulnambiar', 'elonmusk'];
+const ADMIN_USERNAMES = ['iathulnambiar', 'elonmusk'];
 
 export default function AdminPage() {
   const { data: session, status } = useSession();

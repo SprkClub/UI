@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { MongoClient } from 'mongodb';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const ADMIN_USERNAMES = ['athulnambiar', 'elonmusk'];
+const ADMIN_USERNAMES = ['iathulnambiar', 'elonmusk'];
 
 if (!MONGODB_URI || typeof MONGODB_URI !== 'string') {
   throw new Error('MONGODB_URI environment variable is not defined or invalid');

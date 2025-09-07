@@ -9,7 +9,7 @@ const MONGODB_DB = process.env.MONGODB_DB || 'sprkclub';
 if (!MONGODB_URI || typeof MONGODB_URI !== 'string') {
   throw new Error('MONGODB_URI environment variable is not defined or invalid');
 }
-const ADMIN_USERNAMES = ['athulnambiar', 'elonmusk'];
+const ADMIN_USERNAMES = ['iathulnambiar', 'elonmusk'];
 
 interface GlobalMongo {
   _mongoClientPromise?: Promise<MongoClient>;
