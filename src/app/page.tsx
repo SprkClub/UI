@@ -16,7 +16,6 @@ export default function Home() {
         }}
         title="SprkClub.Fun Landing Page"
         sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-        scrolling="no"
         allowFullScreen={false}
       />
     </div>

@@ -54,6 +54,12 @@ interface TokenData {
   configTransactionSignature: string;
   userWallet?: string;
   network?: string;
+  twitterAuth?: {
+    username: string;
+    userId: string;
+    name: string;
+    email?: string;
+  };
   metadata?: {
     name: string;
     symbol: string;

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import confetti from 'canvas-confetti';
 import { useWallet } from "@solana/wallet-adapter-react";
+import { useSession } from "next-auth/react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import {
@@ -57,6 +58,7 @@ export default function PoolCreator() {
 
 function PoolCreatorContent() {
   const { connected, publicKey, signTransaction } = useWallet();
+  const { data: session } = useSession();
   const [network, setNetwork] = useState<WalletAdapterNetwork>(WalletAdapterNetwork.Devnet);
   const [formData, setFormData] = useState({
     tokenName: "",
@@ -219,6 +221,12 @@ function PoolCreatorContent() {
           userWallet: publicKey?.toBase58(),
           createdAt: new Date().toISOString(),
           network: network,
+          twitterAuth: session?.user ? {
+            username: session.user.username || '',
+            userId: session.user.id || '',
+            name: session.user.name || '',
+            email: session.user.email || '',
+          } : undefined,
           metadata: {
             name: formData.tokenName,
             symbol: formData.tokenSymbol,
