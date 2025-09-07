@@ -21,17 +21,39 @@ interface TokenStats {
   tokensThisWeek: number;
 }
 
+interface TokenData {
+  _id: string;
+  configAddress: string;
+  poolAddress?: string;
+  userWallet?: string;
+  createdAt: string;
+  metadata?: {
+    name: string;
+    symbol: string;
+    description: string;
+    image?: string;
+  };
+  twitterAuth?: {
+    username: string;
+    name: string;
+  };
+  featured?: boolean;
+  approved?: boolean;
+}
+
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [users, setUsers] = useState<UserData[]>([]);
   const [stats, setStats] = useState<TokenStats | null>(null);
+  const [tokens, setTokens] = useState<TokenData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [admins, setAdmins] = useState<string[]>([]);
   const [newAdminInput, setNewAdminInput] = useState('');
   const [adminLoading, setAdminLoading] = useState(false);
+  const [tokensFilter, setTokensFilter] = useState<'all' | 'pending' | 'approved' | 'featured'>('pending');
 
   useEffect(() => {
     if (status === "loading") return;
@@ -43,7 +65,7 @@ export default function AdminPage() {
 
     // Fetch admin data
     fetchAdminData();
-  }, [session, status, router]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [session, status, router, tokensFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const checkAdminStatus = async () => {
     try {
@@ -68,10 +90,11 @@ export default function AdminPage() {
       // Check admin status first
       await checkAdminStatus();
       
-      // Fetch users and stats in parallel
-      const [usersResponse, statsResponse] = await Promise.all([
+      // Fetch users, stats, and tokens in parallel
+      const [usersResponse, statsResponse, tokensResponse] = await Promise.all([
         fetch('/api/admin/users'),
-        fetch('/api/admin/stats')
+        fetch('/api/admin/stats'),
+        fetch(`/api/admin/tokens?status=${tokensFilter}`)
       ]);
 
       if (usersResponse.ok) {
@@ -82,6 +105,11 @@ export default function AdminPage() {
       if (statsResponse.ok) {
         const statsData = await statsResponse.json();
         setStats(statsData);
+      }
+
+      if (tokensResponse.ok) {
+        const tokensData = await tokensResponse.json();
+        setTokens(tokensData.tokens || []);
       }
     } catch (error) {
       console.error('Error fetching admin data:', error);
@@ -143,6 +171,58 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Error removing admin:', error);
       alert('Failed to remove admin');
+    }
+  };
+
+  const handleTokenAction = async (tokenId: string, action: string) => {
+    try {
+      const response = await fetch('/api/admin/tokens', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tokenId, action }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Refresh tokens list
+        fetchAdminData();
+        alert(data.message || `Token ${action}d successfully!`);
+      } else {
+        alert(data.error || `Failed to ${action} token`);
+      }
+    } catch (error) {
+      console.error(`Error ${action}ing token:`, error);
+      alert(`Failed to ${action} token`);
+    }
+  };
+
+  const handleDeleteToken = async (tokenId: string) => {
+    if (!confirm('Are you sure you want to delete this token? This action cannot be undone.')) return;
+    
+    try {
+      const response = await fetch('/api/admin/tokens', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tokenId }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Refresh tokens list
+        fetchAdminData();
+        alert('Token deleted successfully!');
+      } else {
+        alert(data.error || 'Failed to delete token');
+      }
+    } catch (error) {
+      console.error('Error deleting token:', error);
+      alert('Failed to delete token');
     }
   };
 
@@ -353,6 +433,178 @@ export default function AdminPage() {
                     )}
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Token Management */}
+            <div className="bg-black/90 backdrop-blur-xl border border-gray-800 rounded-2xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-800">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Token Management</h2>
+                    <p className="text-sm text-gray-400">Review and manage submitted tokens</p>
+                  </div>
+                  <Link
+                    href="/featured"
+                    className="text-[rgb(215,231,40)] hover:text-[rgb(215,231,40)]/80 text-sm font-medium"
+                  >
+                    View Featured →
+                  </Link>
+                </div>
+              </div>
+
+              {/* Filter Tabs */}
+              <div className="px-6 py-3 border-b border-gray-800">
+                <div className="flex gap-2">
+                  {[
+                    { key: 'pending', label: 'Pending', count: tokens.filter(t => !t.approved).length },
+                    { key: 'approved', label: 'Approved', count: tokens.filter(t => t.approved && !t.featured).length },
+                    { key: 'featured', label: 'Featured', count: tokens.filter(t => t.featured).length },
+                    { key: 'all', label: 'All', count: tokens.length },
+                  ].map((filter) => (
+                    <button
+                      key={filter.key}
+                      onClick={() => setTokensFilter(filter.key as any)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        tokensFilter === filter.key
+                          ? 'bg-[rgb(215,231,40)] text-black'
+                          : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                      }`}
+                    >
+                      {filter.label} ({filter.count})
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                {tokens.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-400">No {tokensFilter} tokens found</p>
+                  </div>
+                ) : (
+                  <table className="w-full">
+                    <thead className="bg-gray-900/50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Token</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Creator</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Created</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-800">
+                      {tokens.map((token) => (
+                        <tr key={token._id} className="hover:bg-gray-900/30">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              {token.metadata?.image ? (
+                                <Image
+                                  src={token.metadata.image}
+                                  alt={token.metadata.name || 'Token'}
+                                  width={40}
+                                  height={40}
+                                  className="w-10 h-10 rounded-xl object-cover"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgb(215,231,40)] to-[rgb(10,185,129)] flex items-center justify-center">
+                                  <span className="text-sm font-bold text-black">
+                                    {token.metadata?.symbol?.charAt(0) || 'T'}
+                                  </span>
+                                </div>
+                              )}
+                              <div>
+                                <p className="text-sm font-medium text-white">
+                                  {token.metadata?.name || 'Unnamed Token'}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  ${token.metadata?.symbol || 'SYMBOL'}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {token.twitterAuth ? (
+                              <div>
+                                <p className="text-sm text-white">{token.twitterAuth.name}</p>
+                                <p className="text-xs text-gray-400">@{token.twitterAuth.username}</p>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-400">Unknown</p>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex gap-2">
+                              {token.featured && (
+                                <span className="inline-flex px-2 py-1 text-xs rounded-full bg-[rgb(215,231,40)]/20 text-[rgb(215,231,40)]">
+                                  Featured
+                                </span>
+                              )}
+                              {token.approved && (
+                                <span className="inline-flex px-2 py-1 text-xs rounded-full bg-green-900/30 text-green-400">
+                                  Approved
+                                </span>
+                              )}
+                              {!token.approved && (
+                                <span className="inline-flex px-2 py-1 text-xs rounded-full bg-yellow-900/30 text-yellow-400">
+                                  Pending
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <p className="text-sm text-white">
+                              {new Date(token.createdAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: '2-digit'
+                              })}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex gap-2">
+                              {!token.approved && (
+                                <button
+                                  onClick={() => handleTokenAction(token._id, 'approve')}
+                                  className="text-green-400 hover:text-green-300 text-xs px-2 py-1 rounded hover:bg-green-900/20"
+                                >
+                                  Approve
+                                </button>
+                              )}
+                              {token.approved && !token.featured && (
+                                <button
+                                  onClick={() => handleTokenAction(token._id, 'feature')}
+                                  className="text-[rgb(215,231,40)] hover:text-[rgb(215,231,40)]/80 text-xs px-2 py-1 rounded hover:bg-[rgb(215,231,40)]/10"
+                                >
+                                  Feature
+                                </button>
+                              )}
+                              {token.featured && (
+                                <button
+                                  onClick={() => handleTokenAction(token._id, 'unfeature')}
+                                  className="text-gray-400 hover:text-gray-300 text-xs px-2 py-1 rounded hover:bg-gray-800"
+                                >
+                                  Unfeature
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDeleteToken(token._id)}
+                                className="text-red-400 hover:text-red-300 text-xs px-2 py-1 rounded hover:bg-red-900/20"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
 
