@@ -3,8 +3,17 @@ import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import TwitterProvider from "next-auth/providers/twitter";
 import { MongoClient } from "mongodb";
 
-const client = new MongoClient(process.env.MONGODB_URI!);
-const clientPromise = client.connect();
+const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+
+if (!mongoUri || typeof mongoUri !== 'string') {
+  console.warn('MONGODB_URI not available during build');
+}
+
+const client = new MongoClient(mongoUri);
+const clientPromise = client.connect().catch(() => {
+  // Fail gracefully during build time
+  return Promise.resolve(client);
+});
 
 export const authOptions: NextAuthOptions = {
   adapter: MongoDBAdapter(clientPromise, {

@@ -6,6 +6,10 @@ import { MongoClient } from 'mongodb';
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const ADMIN_USERNAMES = ['athulnambiar', 'elonmusk'];
 
+if (!MONGODB_URI || typeof MONGODB_URI !== 'string') {
+  throw new Error('MONGODB_URI environment variable is not defined or invalid');
+}
+
 interface GlobalMongo {
   _mongoClientPromise?: Promise<MongoClient>;
 }
@@ -27,6 +31,11 @@ if (process.env.NODE_ENV === 'development') {
 
 export async function GET() {
   try {
+    // During build time, skip this API route
+    if (process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI) {
+      return NextResponse.json({ error: 'Database not available during build' }, { status: 503 });
+    }
+
     // Check admin authentication
     const session = await getServerSession(authOptions);
     
