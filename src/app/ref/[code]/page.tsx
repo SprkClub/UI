@@ -14,6 +14,7 @@ export default function ReferralPage() {
   const [referrerInfo, setReferrerInfo] = useState<{ username: string } | null>(null);
   const [processing, setProcessing] = useState(false);
   const [processed, setProcessed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const validateReferralCode = useCallback(async () => {
     try {
@@ -34,6 +35,7 @@ export default function ReferralPage() {
 
   const processReferral = useCallback(async () => {
     setProcessing(true);
+    setError(null);
     try {
       const response = await fetch('/api/referral', {
         method: 'POST',
@@ -54,10 +56,13 @@ export default function ReferralPage() {
           router.push('/create');
         }, 3000);
       } else {
+        // Set specific error message based on response
+        setError(data.error || 'Failed to process referral');
         console.error('Referral processing failed:', data.error);
       }
     } catch (error) {
       console.error('Error processing referral:', error);
+      setError('Network error while processing referral');
     } finally {
       setProcessing(false);
       setLoading(false);
@@ -134,8 +139,8 @@ export default function ReferralPage() {
                 Setting up your account...
               </p>
             </>
-          ) : session?.user ? (
-            // User is logged in but referral might have failed
+          ) : error ? (
+            // Error state with specific error messages
             <>
               <div className="w-20 h-20 bg-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,17 +148,38 @@ export default function ReferralPage() {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-white mb-3">
-                Referral Issue
+                {error.includes('already used this referral') ? 'Already Used' : 
+                 error.includes('already been referred') ? 'Already Referred' : 
+                 error.includes('refer yourself') ? 'Invalid Action' :
+                 error.includes('Invalid referral code') ? 'Invalid Referral' :
+                 'Referral Issue'}
               </h1>
               <p className="text-gray-400 mb-6">
-                This referral link may have already been used or expired.
+                {error.includes('already used this referral') ? 'You have already used this referral link before.' :
+                 error.includes('already been referred') ? 'You have already been referred by someone else.' :
+                 error.includes('refer yourself') ? 'You cannot refer yourself.' :
+                 error.includes('Invalid referral code') ? 'This referral code is invalid or does not exist.' :
+                 error.includes('Network error') ? 'Please check your internet connection and try again.' :
+                 error}
               </p>
-              <Link
-                href="/create"
-                className="inline-block bg-[rgb(215,231,40)] text-black py-3 px-6 rounded-xl font-semibold hover:bg-[rgb(215,231,40)]/90 transition-colors"
-              >
-                Continue to App
-              </Link>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setError(null);
+                    setLoading(true);
+                    validateReferralCode();
+                  }}
+                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-6 rounded-xl font-semibold transition-colors"
+                >
+                  Try Again
+                </button>
+                <Link
+                  href="/create"
+                  className="flex-1 bg-[rgb(215,231,40)] text-black py-3 px-6 rounded-xl font-semibold hover:bg-[rgb(215,231,40)]/90 transition-colors text-center"
+                >
+                  Continue to App
+                </Link>
+              </div>
             </>
           ) : referralValid ? (
             // Valid referral, user needs to sign in

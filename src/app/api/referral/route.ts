@@ -159,10 +159,18 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingReferral) {
-      return NextResponse.json(
-        { error: 'User is already referred by someone else' },
-        { status: 400 }
-      );
+      // Check if they were referred by the same person
+      if (existingReferral.referralCode === referralCode) {
+        return NextResponse.json(
+          { error: 'You have already used this referral link' },
+          { status: 400 }
+        );
+      } else {
+        return NextResponse.json(
+          { error: 'You have already been referred by someone else' },
+          { status: 400 }
+        );
+      }
     }
 
     // Add the new user to referrer's referred users
