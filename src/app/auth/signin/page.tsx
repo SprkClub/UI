@@ -31,7 +31,7 @@ export default function SignIn() {
             console.error('Error processing pending referral:', error);
           }
         }
-        router.push('/create');
+        router.push('/dashboard');
       }
     };
     checkSession();
@@ -41,7 +41,7 @@ export default function SignIn() {
     setIsLoading(true);
     try {
       await signIn('twitter', { 
-        callbackUrl: '/create',
+        callbackUrl: '/dashboard',
         redirect: true 
       });
     } catch (error) {

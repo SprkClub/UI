@@ -51,9 +51,9 @@ export default function ReferralPage() {
         setProcessed(true);
         setReferrerInfo({ username: data.referrerUsername });
         
-        // Redirect to create page after 3 seconds
+        // Redirect to dashboard after 3 seconds
         setTimeout(() => {
-          router.push('/create');
+          router.push('/dashboard');
         }, 3000);
       } else {
         // Set specific error message based on response
@@ -117,13 +117,13 @@ export default function ReferralPage() {
                 You&apos;ve been successfully referred by <span className="text-[rgb(215,231,40)] font-semibold">@{referrerInfo?.username}</span>
               </p>
               <p className="text-gray-500 text-sm mb-6">
-                Redirecting to token launcher in 3 seconds...
+                Redirecting to dashboard in 3 seconds...
               </p>
               <Link
-                href="/create"
+                href="/dashboard"
                 className="inline-block bg-[rgb(215,231,40)] text-black py-3 px-6 rounded-xl font-semibold hover:bg-[rgb(215,231,40)]/90 transition-colors"
               >
-                Launch Your Token Now
+                Go to Dashboard
               </Link>
             </>
           ) : processing ? (
@@ -174,10 +174,10 @@ export default function ReferralPage() {
                   Try Again
                 </button>
                 <Link
-                  href="/create"
+                  href="/dashboard"
                   className="flex-1 bg-[rgb(215,231,40)] text-black py-3 px-6 rounded-xl font-semibold hover:bg-[rgb(215,231,40)]/90 transition-colors text-center"
                 >
-                  Continue to App
+                  Continue to Dashboard
                 </Link>
               </div>
             </>

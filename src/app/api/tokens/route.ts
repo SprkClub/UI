@@ -1,43 +1,67 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MongoClient } from 'mongodb';
+import { getTokensCollection, getReferralsCollection } from '@/lib/mongodb';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const MONGODB_DB = process.env.MONGODB_DB || 'launchpad';
+// Cache for frequently accessed data
+const tokenCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 30000; // 30 seconds cache
 
-interface GlobalMongo {
-  _mongoClientPromise?: Promise<MongoClient>;
+function getCachedData(key: string) {
+  const cached = tokenCache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  return null;
 }
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable so the MongoClient is not constantly re-initialized
-  const globalWithMongo = global as GlobalMongo;
-  if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(MONGODB_URI);
-    globalWithMongo._mongoClientPromise = client.connect();
-  }
-  clientPromise = globalWithMongo._mongoClientPromise;
-} else {
-  // In production mode, it's best to not use a global variable
-  client = new MongoClient(MONGODB_URI);
-  clientPromise = client.connect();
+function setCachedData(key: string, data: any) {
+  tokenCache.set(key, { data, timestamp: Date.now() });
 }
 
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const userWallet = url.searchParams.get('wallet');
+    const limit = parseInt(url.searchParams.get('limit') || '50');
+    const offset = parseInt(url.searchParams.get('offset') || '0');
     
-    const client = await clientPromise;
-    const db = client.db(MONGODB_DB);
-    const collection = db.collection('tokens');
+    // Create cache key
+    const cacheKey = `tokens_${userWallet || 'all'}_${limit}_${offset}`;
+    
+    // Check cache first
+    const cachedTokens = getCachedData(cacheKey);
+    if (cachedTokens) {
+      return NextResponse.json({ tokens: cachedTokens, success: true, cached: true });
+    }
+    
+    const tokensCollection = await getTokensCollection();
     
     const query = userWallet ? { userWallet } : {};
-    const tokens = await collection.find(query).sort({ createdAt: -1 }).toArray();
     
-    return NextResponse.json({ tokens, success: true });
+    // Optimize query with projection to only fetch needed fields
+    const tokens = await tokensCollection
+      .find(query, {
+        projection: {
+          _id: 1,
+          configAddress: 1,
+          poolAddress: 1,
+          userWallet: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          metadata: 1,
+          twitterAuth: 1,
+          featured: 1,
+          approved: 1
+        }
+      })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip(offset)
+      .toArray();
+    
+    // Cache the result
+    setCachedData(cacheKey, tokens);
+    
+    return NextResponse.json({ tokens, success: true, cached: false });
   } catch (error) {
     console.error('Error fetching tokens:', error);
     return NextResponse.json(
@@ -73,10 +97,8 @@ export async function POST(request: NextRequest) {
   try {
     const tokenData: TokenData = await request.json();
     
-    const client = await clientPromise;
-    const db = client.db(MONGODB_DB);
-    const tokensCollection = db.collection('tokens');
-    const referralsCollection = db.collection('referrals');
+    const tokensCollection = await getTokensCollection();
+    const referralsCollection = await getReferralsCollection();
     
     // Add additional fields
     const document = {
@@ -87,33 +109,26 @@ export async function POST(request: NextRequest) {
     
     const result = await tokensCollection.insertOne(document);
     
-    // Update referral data if this user was referred
+    // Clear relevant cache entries
+    tokenCache.clear();
+    
+    // Update referral data asynchronously (don't block response)
     if (tokenData.twitterAuth?.username) {
-      try {
-        // Find any referral record where this user was referred
-        const referralRecord = await referralsCollection.findOne({
-          'referredUsers.username': tokenData.twitterAuth.username
-        });
-        
-        if (referralRecord) {
-          // Update the specific referred user's token count
+      // Run referral update in background
+      setImmediate(async () => {
+        try {
           await referralsCollection.updateOne(
-            { 
-              _id: referralRecord._id,
-              'referredUsers.username': tokenData.twitterAuth.username 
-            },
+            { 'referredUsers.username': tokenData.twitterAuth.username },
             { 
               $inc: { 'referredUsers.$.tokensPurchased': 1 },
               $set: { updatedAt: new Date() }
             }
           );
-          
           console.log(`Updated referral tracking for user ${tokenData.twitterAuth.username}`);
+        } catch (referralError) {
+          console.error('Error updating referral data:', referralError);
         }
-      } catch (referralError) {
-        console.error('Error updating referral data:', referralError);
-        // Don't fail token creation if referral update fails
-      }
+      });
     }
     
     return NextResponse.json({ 

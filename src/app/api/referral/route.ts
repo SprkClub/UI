@@ -1,29 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { MongoClient } from 'mongodb';
+import { getReferralsCollection, getTokensCollection } from '@/lib/mongodb';
 import crypto from 'crypto';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const MONGODB_DB = process.env.MONGODB_DB || 'launchpad';
+// Cache for referral data
+const referralCache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_TTL = 60000; // 1 minute cache for referral data
 
-interface GlobalMongo {
-  _mongoClientPromise?: Promise<MongoClient>;
+function getCachedReferralData(key: string) {
+  const cached = referralCache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+  return null;
 }
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-if (process.env.NODE_ENV === 'development') {
-  const globalWithMongo = global as GlobalMongo;
-  if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(MONGODB_URI);
-    globalWithMongo._mongoClientPromise = client.connect();
-  }
-  clientPromise = globalWithMongo._mongoClientPromise;
-} else {
-  client = new MongoClient(MONGODB_URI);
-  clientPromise = client.connect();
+function setCachedReferralData(key: string, data: any) {
+  referralCache.set(key, { data, timestamp: Date.now() });
 }
 
 // Generate unique referral code
@@ -44,12 +38,19 @@ export async function GET() {
       );
     }
 
-    const client = await clientPromise;
-    const db = client.db(MONGODB_DB);
-    
-    // Get or create referral record
-    const referralsCollection = db.collection('referrals');
-    const tokensCollection = db.collection('tokens');
+    // Check cache first
+    const cacheKey = `referral_${session.user.username}`;
+    const cachedData = getCachedReferralData(cacheKey);
+    if (cachedData) {
+      return NextResponse.json({
+        success: true,
+        referralData: cachedData,
+        cached: true
+      });
+    }
+
+    const referralsCollection = await getReferralsCollection();
+    const tokensCollection = await getTokensCollection();
     
     let referralData = await referralsCollection.findOne({ 
       username: session.user.username 
@@ -73,33 +74,50 @@ export async function GET() {
       referralData = await referralsCollection.findOne({ _id: result.insertedId });
     }
 
-    // Get referred users with their token purchase data
-    const referredUsers = [];
-    for (const referredUser of referralData?.referredUsers || []) {
-      // Get token purchases by this referred user
-      const userTokens = await tokensCollection.find({
-        'twitterAuth.username': referredUser.username
-      }).toArray();
+    // Optimize: Use aggregation pipeline to get token counts efficiently
+    const referredUsernames = referralData?.referredUsers?.map((u: any) => u.username) || [];
+    
+    let tokenCounts: { [key: string]: number } = {};
+    if (referredUsernames.length > 0) {
+      const tokenCountsResult = await tokensCollection.aggregate([
+        {
+          $match: {
+            'twitterAuth.username': { $in: referredUsernames }
+          }
+        },
+        {
+          $group: {
+            _id: '$twitterAuth.username',
+            count: { $sum: 1 }
+          }
+        }
+      ]).toArray();
       
-      referredUsers.push({
-        ...referredUser,
-        tokensPurchased: userTokens.length,
-        tokens: userTokens.map(token => ({
-          _id: token._id,
-          name: token.metadata?.name || 'Unnamed Token',
-          symbol: token.metadata?.symbol || 'SYMBOL',
-          createdAt: token.createdAt
-        }))
-      });
+      tokenCounts = tokenCountsResult.reduce((acc: any, item: any) => {
+        acc[item._id] = item.count;
+        return acc;
+      }, {});
     }
+
+    // Build referred users with token counts
+    const referredUsers = (referralData?.referredUsers || []).map((referredUser: any) => ({
+      ...referredUser,
+      tokensPurchased: tokenCounts[referredUser.username] || 0
+    }));
+
+    const result = {
+      ...referralData,
+      referredUsers,
+      referralLink: `${process.env.NEXTAUTH_URL}/ref/${referralData?.referralCode}`
+    };
+
+    // Cache the result
+    setCachedReferralData(cacheKey, result);
 
     return NextResponse.json({
       success: true,
-      referralData: {
-        ...referralData,
-        referredUsers,
-        referralLink: `${process.env.NEXTAUTH_URL}/ref/${referralData?.referralCode}`
-      }
+      referralData: result,
+      cached: false
     });
   } catch (error) {
     console.error('Error fetching referral data:', error);
@@ -131,36 +149,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = await clientPromise;
-    const db = client.db(MONGODB_DB);
-    const referralsCollection = db.collection('referrals');
+    const referralsCollection = await getReferralsCollection();
     
-    // Find the referrer
-    const referrer = await referralsCollection.findOne({ referralCode });
-    
-    if (!referrer) {
+    // Use a single aggregation to check both conditions efficiently
+    const validationResult = await referralsCollection.aggregate([
+      {
+        $facet: {
+          referrer: [
+            { $match: { referralCode } }
+          ],
+          existingReferral: [
+            { $match: { 'referredUsers.username': session.user.username } }
+          ]
+        }
+      }
+    ]).toArray();
+
+    const { referrer, existingReferral } = validationResult[0];
+
+    if (referrer.length === 0) {
       return NextResponse.json(
         { error: 'Invalid referral code' },
         { status: 404 }
       );
     }
 
+    const referrerData = referrer[0];
+
     // Check if user is trying to refer themselves
-    if (referrer.username === session.user.username) {
+    if (referrerData.username === session.user.username) {
       return NextResponse.json(
         { error: 'Cannot refer yourself' },
         { status: 400 }
       );
     }
 
-    // Check if user is already referred by someone
-    const existingReferral = await referralsCollection.findOne({
-      'referredUsers.username': session.user.username
-    });
-
-    if (existingReferral) {
-      // Check if they were referred by the same person
-      if (existingReferral.referralCode === referralCode) {
+    if (existingReferral.length > 0) {
+      const existing = existingReferral[0];
+      if (existing.referralCode === referralCode) {
         return NextResponse.json(
           { error: 'You have already used this referral link' },
           { status: 400 }
@@ -191,10 +217,13 @@ export async function POST(request: NextRequest) {
       } as Record<string, unknown>
     );
 
+    // Clear cache for the referrer
+    referralCache.delete(`referral_${referrerData.username}`);
+
     return NextResponse.json({
       success: true,
       message: 'Referral processed successfully',
-      referrerUsername: referrer.username
+      referrerUsername: referrerData.username
     });
   } catch (error) {
     console.error('Error processing referral:', error);
