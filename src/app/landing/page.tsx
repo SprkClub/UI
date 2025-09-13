@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import DynamicNavbar from '@/components/DynamicNavbar';
 
 export default function LandingPage() {
   const { data: session } = useSession();
@@ -27,10 +28,13 @@ export default function LandingPage() {
     );
   }
 
-  // Show landing page for unauthenticated users
+  // Show landing page for unauthenticated users with overlay navbar
   return (
-    <div className="min-h-screen">
-      <iframe 
+    <div className="min-h-screen relative">
+      {/* Overlay the navbar on top of the iframe */}
+      <DynamicNavbar isLandingPage={true} />
+
+      <iframe
         src="/index.html"
         className="w-full h-screen border-0"
         title="SprkClub Landing Page"

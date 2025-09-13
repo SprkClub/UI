@@ -1,23 +1,33 @@
 import { NextResponse } from 'next/server';
-import { ensureIndexes } from '@/lib/mongodb';
+import { connectToDatabase } from '@/lib/mongodb';
 
 export async function GET() {
+  const startTime = Date.now();
+
   try {
-    // Ensure database indexes on health check
-    await ensureIndexes();
-    
-    return NextResponse.json({ 
+    // Test database connection speed
+    const dbStart = Date.now();
+    await connectToDatabase();
+    const dbTime = Date.now() - dbStart;
+
+    const totalTime = Date.now() - startTime;
+
+    return NextResponse.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      indexes: 'ensured'
+      uptime: process.uptime(),
+      performance: {
+        totalResponseTime: `${totalTime}ms`,
+        databaseConnectionTime: `${dbTime}ms`
+      }
     });
   } catch (error) {
-    console.error('Health check failed:', error);
+    const totalTime = Date.now() - startTime;
     return NextResponse.json(
-      { 
-        status: 'error',
-        timestamp: new Date().toISOString(),
-        error: 'Database connection failed'
+      {
+        status: 'unhealthy',
+        error: String(error),
+        responseTime: `${totalTime}ms`
       },
       { status: 500 }
     );

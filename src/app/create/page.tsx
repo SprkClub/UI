@@ -1,10 +1,11 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import WalletProvider from "../components/WalletProvider";
 import PoolCreator from "../components/PoolCreator";
+import DynamicNavbar from "@/components/DynamicNavbar";
 import Image from "next/image";
 
 import one from '../../../public/1.png';
@@ -23,9 +24,6 @@ export default function CreatePage() {
     }
   }, [session, status, router]);
 
-  const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/' });
-  };
 
   if (status === "loading") {
     return (
@@ -54,32 +52,11 @@ export default function CreatePage() {
         </div>
 
 
+        {/* Navigation */}
+        <DynamicNavbar currentPage="create" />
+
         {/* Main Content */}
         <div className="relative z-10">
-          {/* User Header */}
-          <div className="absolute top-4 right-4 z-20">
-            <div className="bg-black/90 backdrop-blur-xl border border-gray-800 rounded-2xl px-4 py-2 flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[rgb(215,231,40)] rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
-                </div>
-                <div className="text-sm">
-                  <p className="text-white font-medium">@{session?.user?.username || session?.user?.name}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="text-gray-400 hover:text-white transition-colors text-sm px-2 py-1 rounded-lg hover:bg-gray-800"
-                title="Sign out"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
-            </div>
-          </div>
 
           {/* Header */}
           <div className="text-center py-8 md:py-16 px-4">

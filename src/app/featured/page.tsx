@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Navigation from "@/components/Navigation";
+import DynamicNavbar from "@/components/DynamicNavbar";
 
 interface TokenData {
   _id: string;
@@ -239,7 +239,7 @@ export default function FeaturedTokens() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-      <Navigation currentPage="featured" />
+      <DynamicNavbar currentPage="featured" />
       
       {/* Page Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

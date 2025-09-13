@@ -1,29 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import { getReferralsCollection, getTokensCollection } from '@/lib/mongodb';
+import { getReferralsCollection } from '@/lib/mongodb';
+import { apiCache, cacheKeys, getCachedOrFetch } from '@/utils/cache';
 import crypto from 'crypto';
-
-// Cache for referral data
-interface CacheData {
-  data: Record<string, unknown>;
-  timestamp: number;
-}
-
-const referralCache = new Map<string, CacheData>();
-const CACHE_TTL = 60000; // 1 minute cache for referral data
-
-function getCachedReferralData(key: string) {
-  const cached = referralCache.get(key);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.data;
-  }
-  return null;
-}
-
-function setCachedReferralData(key: string, data: Record<string, unknown>) {
-  referralCache.set(key, { data, timestamp: Date.now() });
-}
 
 // Generate unique referral code
 function generateReferralCode(username: string): string {
@@ -31,11 +11,12 @@ function generateReferralCode(username: string): string {
   return hash.substring(0, 8).toUpperCase();
 }
 
-// GET - Get user's referral data and referred users
+// GET - Ultra-fast referral data retrieval
 export async function GET() {
   try {
+    // Get session directly
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.username) {
       return NextResponse.json(
         { error: 'Authentication required' },
@@ -43,101 +24,79 @@ export async function GET() {
       );
     }
 
-    // Check cache first
-    const cacheKey = `referral_${session.user.username}`;
-    const cachedData = getCachedReferralData(cacheKey);
-    if (cachedData) {
-      return NextResponse.json({
-        success: true,
-        referralData: cachedData,
-        cached: true
-      });
-    }
+    const referralData = await getCachedOrFetch(
+      apiCache,
+      cacheKey,
+      async () => {
+        const referralsCollection = await getReferralsCollection();
 
-    const referralsCollection = await getReferralsCollection();
-    const tokensCollection = await getTokensCollection();
-    
-    let referralData = await referralsCollection.findOne({ 
-      username: session.user.username 
-    });
-    
-    // Create referral record if doesn't exist
-    if (!referralData) {
-      const referralCode = generateReferralCode(session.user.username);
-      const newReferral = {
-        username: session.user.username,
-        userId: session.user.id,
-        referralCode,
-        totalReferred: 0,
-        totalEarnings: 0,
-        referredUsers: [],
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      const result = await referralsCollection.insertOne(newReferral);
-      referralData = await referralsCollection.findOne({ _id: result.insertedId });
-    }
+        // Fast database query with optimized projection
+        let data = await referralsCollection.findOne(
+          { username: session.user.username },
+          {
+            projection: {
+              username: 1,
+              referralCode: 1,
+              referredUsers: 1,
+              totalReferred: 1,
+              totalEarnings: 1
+            }
+          }
+        );
 
-    // Optimize: Use aggregation pipeline to get token counts efficiently
-    const referredUsernames = referralData?.referredUsers?.map((u: { username: string }) => u.username) || [];
-    
-    let tokenCounts: { [key: string]: number } = {};
-    if (referredUsernames.length > 0) {
-      const tokenCountsResult = await tokensCollection.aggregate([
-        {
-          $match: {
-            'twitterAuth.username': { $in: referredUsernames }
-          }
-        },
-        {
-          $group: {
-            _id: '$twitterAuth.username',
-            count: { $sum: 1 }
-          }
+        // Create referral record if doesn't exist
+        if (!data) {
+          const referralCode = generateReferralCode(session.user.username);
+          const newReferral = {
+            username: session.user.username,
+            referralCode,
+            referredUsers: [],
+            totalReferred: 0,
+            totalEarnings: 0,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+
+          await referralsCollection.insertOne(newReferral);
+          data = newReferral;
         }
-      ]).toArray();
-      
-      tokenCounts = tokenCountsResult.reduce((acc: { [key: string]: number }, item) => {
-        acc[item._id as string] = item.count as number;
-        return acc;
-      }, {} as { [key: string]: number });
-    }
 
-    // Build referred users with token counts
-    const referredUsers = (referralData?.referredUsers || []).map((referredUser: { username: string; [key: string]: unknown }) => ({
-      ...referredUser,
-      tokensPurchased: tokenCounts[referredUser.username] || 0
-    }));
-
-    const result = {
-      ...referralData,
-      referredUsers,
-      referralLink: `${process.env.NEXTAUTH_URL}/ref/${referralData?.referralCode}`
-    };
-
-    // Cache the result
-    setCachedReferralData(cacheKey, result);
+        return {
+          username: data.username,
+          referralCode: data.referralCode,
+          referredUsers: (data.referredUsers || []).map((user: any) => ({
+            username: user.username,
+            referredAt: user.referredAt,
+            tokensPurchased: 0 // Skip expensive counting for speed
+          })),
+          totalReferred: data.referredUsers?.length || 0,
+          totalEarnings: data.totalEarnings || 0,
+          referralUrl: `${process.env.NEXTAUTH_URL || 'https://sprkclub.fun'}/ref/${data.referralCode}`
+        };
+      },
+      60000 // 1 minute cache
+    );
 
     return NextResponse.json({
       success: true,
-      referralData: result,
-      cached: false
+      referralData,
+      cached: apiCache.get(cacheKey) !== null
     });
+
   } catch (error) {
-    console.error('Error fetching referral data:', error);
+    console.error('Referral API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch referral data' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
 }
 
-// POST - Process referral when new user signs up
-export async function POST(request: NextRequest) {
+// POST - Create or update referral
+export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.username) {
       return NextResponse.json(
         { error: 'Authentication required' },
@@ -145,95 +104,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { referralCode } = await request.json();
-    
-    if (!referralCode) {
+    const { referredUsername } = await request.json();
+
+    if (!referredUsername) {
       return NextResponse.json(
-        { error: 'Referral code is required' },
+        { error: 'Referred username required' },
         { status: 400 }
       );
     }
+
+    // Clear cache for immediate update
+    const cacheKey = cacheKeys.referral(session.user.username);
+    apiCache.delete(cacheKey);
 
     const referralsCollection = await getReferralsCollection();
-    
-    // Use a single aggregation to check both conditions efficiently
-    const validationResult = await referralsCollection.aggregate([
-      {
-        $facet: {
-          referrer: [
-            { $match: { referralCode } }
-          ],
-          existingReferral: [
-            { $match: { 'referredUsers.username': session.user.username } }
-          ]
-        }
-      }
-    ]).toArray();
 
-    const { referrer, existingReferral } = validationResult[0];
-
-    if (referrer.length === 0) {
-      return NextResponse.json(
-        { error: 'Invalid referral code' },
-        { status: 404 }
-      );
-    }
-
-    const referrerData = referrer[0];
-
-    // Check if user is trying to refer themselves
-    if (referrerData.username === session.user.username) {
-      return NextResponse.json(
-        { error: 'Cannot refer yourself' },
-        { status: 400 }
-      );
-    }
-
-    if (existingReferral.length > 0) {
-      const existing = existingReferral[0];
-      if (existing.referralCode === referralCode) {
-        return NextResponse.json(
-          { error: 'You have already used this referral link' },
-          { status: 400 }
-        );
-      } else {
-        return NextResponse.json(
-          { error: 'You have already been referred by someone else' },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Add the new user to referrer's referred users
-    const newReferredUser = {
-      username: session.user.username,
-      userId: session.user.id,
-      name: session.user.name,
-      referredAt: new Date(),
-      tokensPurchased: 0
-    };
-
+    // Update referral data
     await referralsCollection.updateOne(
-      { referralCode },
+      { username: session.user.username },
       {
-        $push: { referredUsers: newReferredUser },
+        $addToSet: {
+          referredUsers: {
+            username: referredUsername,
+            referredAt: new Date()
+          }
+        },
         $inc: { totalReferred: 1 },
         $set: { updatedAt: new Date() }
-      } as Record<string, unknown>
+      },
+      { upsert: true }
     );
-
-    // Clear cache for the referrer
-    referralCache.delete(`referral_${referrerData.username}`);
 
     return NextResponse.json({
       success: true,
-      message: 'Referral processed successfully',
-      referrerUsername: referrerData.username
+      message: 'Referral updated successfully'
     });
+
   } catch (error) {
-    console.error('Error processing referral:', error);
+    console.error('Referral update error:', error);
     return NextResponse.json(
-      { error: 'Failed to process referral' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

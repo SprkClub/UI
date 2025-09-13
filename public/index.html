@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="utf-8">
-    <title>sprkclub.fun - ICO & Crypto Landing Page Template</title>
+    <title>sprkclub.fun - The Crypto Launchpad Empowering Creators</title>
+    <meta name="description" content="Turn Your Fanbase Into Your Revenue Stream. Launch your own token, reward loyal fans, and create sustainable income from your creative work.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.png">
-    <!-- Place favicon.ico in the root directory -->
 
     <!-- CSS here -->
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
@@ -18,64 +18,82 @@
     <link rel="stylesheet" href="assets/css/default.css">
     <link rel="stylesheet" href="assets/css/aos.css">
     <link rel="stylesheet" href="assets/css/main.css">
-    
-    <!-- Custom styles for navbar fixes -->
+
+    <!-- Custom styles for creator-focused landing page -->
     <style>
-        .tgmenu__action .list-wrap {
-            gap: 10px !important;
+        .creator-stat {
+            text-align: center;
+            padding: 20px;
         }
-        
-        .tgmenu__action .header-btn a {
-            display: inline-block;
-            white-space: nowrap;
-            min-width: auto;
+        .creator-stat h3 {
+            color: rgb(215,231,40);
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
         }
-        
-        .tgmenu__nav {
+        .creator-stat p {
+            color: #fff;
+            font-size: 1rem;
+            margin: 0;
+        }
+        .creator-type {
+            background: linear-gradient(135deg, rgba(215,231,40,0.1) 0%, rgba(0,0,0,0.8) 100%);
+            border-radius: 15px;
+            padding: 30px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 1px solid rgba(215,231,40,0.2);
+            transition: all 0.3s ease;
+        }
+        .creator-type:hover {
+            transform: translateY(-5px);
+            border-color: rgb(215,231,40);
+        }
+        .creator-type h4 {
+            color: rgb(215,231,40);
+            margin-bottom: 15px;
+        }
+        .creator-type ul {
+            list-style: none;
+            padding: 0;
+            color: #ccc;
+        }
+        .creator-type ul li:before {
+            content: "✓ ";
+            color: rgb(215,231,40);
+            font-weight: bold;
+        }
+        .step-number {
+            background: linear-gradient(135deg, rgb(215,231,40) 0%, #f0e654 100%);
+            color: #000;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto 20px auto;
         }
-        
-        @media (max-width: 991px) {
-            .tgmenu__action {
-                margin-left: auto;
-            }
-            
-            .tgmenu__action .header-btn a {
-                padding: 8px 16px !important;
-                font-size: 14px;
-            }
+        .trusted-by {
+            background: rgba(215,231,40,0.1);
+            padding: 15px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            margin: 20px 10px;
+            color: #fff;
+            border: 1px solid rgba(215,231,40,0.3);
         }
-        
-        @media (max-width: 767px) {
-            .tgmenu__action .header-btn a {
-                padding: 6px 12px !important;
-                font-size: 12px;
-            }
-            
-            .tgmenu__action .list-wrap {
-                flex-wrap: nowrap;
-            }
-            
-            .header-btn {
-                margin: 0 !important;
-            }
-        }
-        
-        /* Additional mobile fixes */
-        @media (max-width: 480px) {
-            .tgmenu__action .header-btn a {
-                padding: 4px 8px !important;
-                font-size: 11px;
-                min-width: 60px;
-                text-align: center;
-            }
+        .hero-subtitle {
+            font-size: 1.4rem;
+            color: #ccc;
+            margin-bottom: 30px;
         }
     </style>
 </head>
 
 <body>
-
     <!--Preloader-->
     <div id="preloader">
         <div class="loader"></div>
@@ -97,23 +115,24 @@
                         <div class="tgmenu__wrap">
                             <nav class="tgmenu__nav">
                                 <div class="logo">
-                                    <a href="index.html"><img src="assets/img/SPRKCLUB.FUN.png" alt="Logo" width="150" height="50"></a>
+                                    <a href="index.html"><img src="assets/img/SPRKCLUB.FUN.png" alt="sprkclub.fun Logo" width="150" height="50"></a>
                                 </div>
                                 <div class="tgmenu__navbar-wrap tgmenu__main-menu d-none d-lg-flex">
                                     <ul class="navigation">
                                         <li><a href="#home" class="section-link">Home</a></li>
                                         <li><a href="#features" class="section-link">Features</a></li>
+                                        <li><a href="#creators" class="section-link">For Creators</a></li>
                                         <li><a href="#work" class="section-link">How it Works</a></li>
-                                        <li><a href="#roadmap" class="section-link">Roadmap</a></li>
+                                        <li><a href="#stats" class="section-link">Success Stories</a></li>
                                     </ul>
                                 </div>
                                 <div class="tgmenu__action">
                                     <ul class="list-wrap d-flex align-items-center">
                                         <li class="header-btn" style="margin-right: 15px;">
-                                            <a href="/featured" target="_parent" class="tg-btn-outline" style="padding: 12px 24px; border-radius: 8px; font-weight: 600;">Featured</a>
+                                            <a href="/featured" target="_parent" class="tg-btn-outline" style="padding: 12px 24px; border-radius: 8px; font-weight: 600;">Featured Tokens</a>
                                         </li>
                                         <li class="header-btn">
-                                            <a href="/dashboard" target="_parent" class="tg-btn" style="padding: 12px 24px; border-radius: 8px; font-weight: 600;">Dashboard</a>
+                                            <a href="/dashboard" target="_parent" class="tg-btn" style="padding: 12px 24px; border-radius: 8px; font-weight: 600;">Launch Your Token</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -132,12 +151,6 @@
                 <div class="nav-logo">
                     <a href="index.html"><img src="assets/img/SPRKCLUB.FUN.png" alt="Logo" width="150" height="50"></a>
                 </div>
-                <div class="tgmobile__search">
-                    <form action="#">
-                        <input type="text" placeholder="Search here...">
-                        <button><i class="fas fa-search"></i></button>
-                    </form>
-                </div>
                 <div class="tgmobile__menu-outer">
                     <!--Here Menu Will Come Automatically Via Javascript / Same Menu as in Header-->
                 </div>
@@ -150,11 +163,8 @@
         </div>
         <div class="tgmobile__menu-backdrop"></div>
         <!-- End Mobile Menu -->
-
     </header>
     <!-- header-area-end -->
-
-
 
     <!-- main-area -->
     <main class="main-area fix">
@@ -163,12 +173,37 @@
         <section class="banner__area banner__bg" data-background="assets/img/banner/hero_bg.svg">
             <div class="container">
                 <div class="row justify-content-center">
-                    <div class="col-xl-7 col-lg-8 col-md-10">
-                            <span class="sub-title wow fadeInUp" data-wow-delay=".2s" data-wow-duration="1s">sprkclub.fun LAUNCHPAD</span>
-                            <h2 class="title wow zoomIn" data-wow-delay=".4s" data-wow-duration="1s" style="font-size: 3.5rem;">Create <span>bonding curve</span> pools</h2>
-                            <p class="wow fadeInUp" data-wow-delay=".6s" data-wow-duration="1s">with automated token deployment and instant liquidity provision</p>
-                            
-                            <span class="banner__content-bottom wow fadeInUp" data-wow-delay=".8s" data-wow-duration="1s">Start launching tokens or <a href="#!">contact us!</a></span>
+                    <div class="col-xl-10 col-lg-12">
+                        <div class="banner__content text-center">
+                            <h1 class="title wow fadeInUp" data-wow-delay=".2s" data-wow-duration="1s" style="font-size: 4rem; margin-bottom: 20px;">
+                                sprkclub.<span style="color: rgb(215,231,40);">fun</span>
+                            </h1>
+                            <h2 class="hero-subtitle wow fadeInUp" data-wow-delay=".4s" data-wow-duration="1s">
+                                The crypto launchpad empowering creators to monetize their communities
+                            </h2>
+                            <h3 class="wow fadeInUp" data-wow-delay=".6s" data-wow-duration="1s" style="font-size: 2.2rem; color: rgb(215,231,40); margin-bottom: 25px;">
+                                Turn Your Fanbase Into Your Revenue Stream
+                            </h3>
+                            <p class="wow fadeInUp" data-wow-delay=".8s" data-wow-duration="1s" style="font-size: 1.2rem; color: #ccc; max-width: 800px; margin: 0 auto 40px auto;">
+                                Launch your own token, reward loyal fans, and create sustainable income from your creative work. Join musicians, artists, and creators who are redefining fan engagement.
+                            </p>
+
+                            <div class="banner__btn-wrap wow fadeInUp" data-wow-delay="1s" data-wow-duration="1s">
+                                <a href="/dashboard" target="_parent" class="tg-btn" style="margin-right: 20px; padding: 15px 35px;">Launch Your Token</a>
+                                <a href="#work" class="tg-btn-outline section-link" style="padding: 15px 35px;">See How It Works</a>
+                            </div>
+
+                            <!-- Trusted by section -->
+                            <div class="wow fadeInUp" data-wow-delay="1.2s" data-wow-duration="1s" style="margin-top: 60px;">
+                                <p style="color: #888; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px;">TRUSTED BY CREATORS WORLDWIDE</p>
+                                <div class="d-flex flex-wrap justify-content-center">
+                                    <span class="trusted-by">🎵 Musicians</span>
+                                    <span class="trusted-by">🎨 Artists</span>
+                                    <span class="trusted-by">🎬 Animators</span>
+                                    <span class="trusted-by">📱 Content Creators</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -181,456 +216,248 @@
         </section>
         <!-- banner-area-end -->
 
-        <!-- brand-area -->
-        <div class="brand__area">
-            <div class="container">
-                <div class="brand__item-wrap">
-                    <div class="swiper-container fix brand-active">
-                        <div class="swiper-wrapper">
-                            <div class="swiper-slide">
-                                <div class="brand__item">
-                                    <img src="assets/img/brand/brand_01.svg" alt="logo">
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="brand__item">
-                                    <img src="assets/img/brand/brand_02.svg" alt="logo">
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="brand__item">
-                                    <img src="assets/img/brand/brand_03.svg" alt="logo">
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="brand__item">
-                                    <img src="assets/img/brand/brand_04.svg" alt="logo">
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="brand__item">
-                                    <img src="assets/img/brand/brand_05.svg" alt="logo">
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="brand__item">
-                                    <img src="assets/img/brand/brand_06.svg" alt="logo">
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="brand__item">
-                                    <img src="assets/img/brand/brand_04.svg" alt="logo">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- brand-area-end -->
-
         <!-- features-area -->
         <section id="features" class="features__area section-pt-120">
             <div class="container">
                 <div class="row justify-content-center">
+                    <div class="col-lg-8">
                         <div class="section__title text-center mb-80">
-                            <span class="sub-title">everything you need</span>
-                            <h2 class="title">Launch, <span>monitor</span> and trade tokens</h2>
+                            <span class="sub-title">Everything You Need to Succeed</span>
+                            <h2 class="title">Our platform provides all the tools and features you need to transform your <span>creative work</span> into sustainable income</h2>
                         </div>
+                    </div>
                 </div>
                 <div class="row gutter-y-40">
-                    <div class="col-lg-6">
-                        <div class="features__item">
-                            <div class="features__icon">
-                                <img src="assets/img/icon/features_icon01.png" alt="icon">
-                            </div>
-                            <div class="features__content">
-                                <h4 class="title">Pool <span>Launch</span></h4>
-                                <p>Create bonding curve pools with automated token deployment and instant liquidity.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="features__item">
-                            <div class="features__icon">
-                                <img src="assets/img/icon/features_icon02.png" alt="icon">
-                            </div>
-                            <div class="features__content">
-                                <h4 class="title">Pool <span>Progress</span></h4>
-                                <p>Monitor your bonding curve pool progress with real-time analytics and insights.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-4 col-md-6">
                         <div class="features__item features__item-two">
                             <div class="features__icon">
-                                <img src="assets/img/icon/features_icon03.png" alt="icon">
+                                <img src="assets/img/icon/features_icon01.png" alt="Token Creation">
                             </div>
                             <div class="features__content">
-                                <h4 class="title">Token <span>Swap</span></h4>
-                                <p>Buy and sell tokens seamlessly with integrated wallet support and optimal pricing.</p>
+                                <h4 class="title">Token <span>Creation</span></h4>
+                                <p>Launch your own cryptocurrency token with just a few clicks. No technical knowledge required.</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-4 col-md-6">
                         <div class="features__item features__item-two">
                             <div class="features__icon">
-                                <img src="assets/img/icon/features_icon04.png" alt="icon">
+                                <img src="assets/img/icon/features_icon02.png" alt="Community Building">
                             </div>
                             <div class="features__content">
-                                <h4 class="title">Wallet <span>Integration</span></h4>
-                                <p>Connect your Phantom wallet for seamless trading experience with low transaction fees.</p>
+                                <h4 class="title">Community <span>Building</span></h4>
+                                <p>Reward your most loyal fans with exclusive tokens and create deeper engagement.</p>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-4 col-md-6">
                         <div class="features__item features__item-two">
                             <div class="features__icon">
-                                <img src="assets/img/icon/features_icon05.png" alt="icon">
+                                <img src="assets/img/icon/features_icon03.png" alt="Revenue Streams">
                             </div>
                             <div class="features__content">
-                                <h4 class="title">Real-time <span>Analytics</span></h4>
-                                <p>Track pool health metrics and historical data with comprehensive analytics dashboard.</p>
+                                <h4 class="title">Revenue <span>Streams</span></h4>
+                                <p>Multiple monetization options including token sales, exclusive content, and fan rewards.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="features__item features__item-two">
+                            <div class="features__icon">
+                                <img src="assets/img/icon/features_icon04.png" alt="Secure & Transparent">
+                            </div>
+                            <div class="features__content">
+                                <h4 class="title">Secure & <span>Transparent</span></h4>
+                                <p>Built on blockchain technology ensuring transparency and security for all transactions.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="features__item features__item-two">
+                            <div class="features__icon">
+                                <img src="assets/img/icon/features_icon05.png" alt="Lightning Fast">
+                            </div>
+                            <div class="features__content">
+                                <h4 class="title">Lightning <span>Fast</span></h4>
+                                <p>Quick deployment and instant transactions. Get your token live in minutes, not months.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="features__item features__item-two">
+                            <div class="features__icon">
+                                <img src="assets/img/icon/crypto_icon03.svg" alt="Global Reach">
+                            </div>
+                            <div class="features__content">
+                                <h4 class="title">Global <span>Reach</span></h4>
+                                <p>Accept payments from fans worldwide without geographical restrictions or traditional banking limits.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="features__shape">
-                <img src="assets/img/images/features_shape.png" alt="shape">
             </div>
         </section>
         <!-- features-area-end -->
 
-        <!-- marquee-area -->
-        <section class="marquee__area section-pt-120">
-                <div class="marquee_mode marquee__group">
-                    <h6 class="marquee__item">Launch tokens on Solana with sprkclub.fun</h6>
-                    <h6 class="marquee__item">Launch tokens on Solana with sprkclub.fun</h6>
-                </div>
-        </section>
-        <!-- marquee-area-end -->
-
-        <!-- token-area -->
-        <!-- <section id="token" class="token__area section-py-120">
+        <!-- creators-area -->
+        <section id="creators" class="crypto__area section-py-120">
             <div class="container">
-                <div class="row align-items-center">
-                        <div class="token__content" data-aos="fade-right" data-aos-delay="0">
-                            <div class="section__title mb-40">
-                                <span class="sub-title">pool launch</span>
-                                <h2 class="title">Create bonding <span>curve</span> pools</h2>
-                            </div>
-                            <p>Create bonding curve pools with automated token deployment and instant liquidity provision.</p>
-                            <a href="#!" class="tg-btn tg-btn-two">LAUNCH POOL</a>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="section__title text-center mb-80">
+                            <span class="sub-title">Built for Every Type of Creator</span>
+                            <h2 class="title">Whether you're creating music, art, animations, or content, <span>sprkclub.fun</span> helps you monetize your passion</h2>
                         </div>
-                    <div class="col-lg-6">
-                        <div class="token__wrap" data-aos="fade-left" data-aos-delay="0">
-                            <div class="token__wrap-inner">
-                            </div>
-                            <div class="copy-text">
-                                <mark>0x2170Ed0880ac9A755fd29B2688956BD959F933F8</mark>
-                                <button class="copy-btn"><img src="assets/img/icon/copy.svg" alt=""></button>
-                            </div>
+                    </div>
+                </div>
+                <div class="row gutter-y-40">
+                    <div class="col-lg-6 col-md-6">
+                        <div class="creator-type">
+                            <h4>🎵 Musicians</h4>
+                            <p style="color: #ccc; margin-bottom: 20px;">Launch exclusive album tokens, reward concert attendees, and create VIP fan experiences.</p>
+                            <h5 style="color: rgb(215,231,40); margin-bottom: 10px;">WHAT YOU CAN OFFER:</h5>
+                            <ul>
+                                <li>Album pre-sales</li>
+                                <li>Concert perks</li>
+                                <li>Exclusive tracks</li>
+                                <li>Meet & greet access</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6">
+                        <div class="creator-type">
+                            <h4>🎨 Artists</h4>
+                            <p style="color: #ccc; margin-bottom: 20px;">Monetize your art with exclusive releases, collector editions, and direct fan support.</p>
+                            <h5 style="color: rgb(215,231,40); margin-bottom: 10px;">WHAT YOU CAN OFFER:</h5>
+                            <ul>
+                                <li>Limited edition art</li>
+                                <li>Character NFTs</li>
+                                <li>Signed prints</li>
+                                <li>Art commissions</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6">
+                        <div class="creator-type">
+                            <h4>🎬 Animators</h4>
+                            <p style="color: #ccc; margin-bottom: 20px;">Fund your projects through community tokens and reward supporters with exclusive content.</p>
+                            <h5 style="color: rgb(215,231,40); margin-bottom: 10px;">WHAT YOU CAN OFFER:</h5>
+                            <ul>
+                                <li>Project funding</li>
+                                <li>Behind-scenes content</li>
+                                <li>Character designs</li>
+                                <li>Voice actor perks</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6">
+                        <div class="creator-type">
+                            <h4>📱 Content Creators</h4>
+                            <p style="color: #ccc; margin-bottom: 20px;">Build deeper connections with your audience through exclusive tokens and premium experiences.</p>
+                            <h5 style="color: rgb(215,231,40); margin-bottom: 10px;">WHAT YOU CAN OFFER:</h5>
+                            <ul>
+                                <li>Premium content</li>
+                                <li>Live stream perks</li>
+                                <li>Community access</li>
+                                <li>Personal shoutouts</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="token__shape">
-                <img src="assets/img/images/features_shape.png" alt="">
-            </div>
-        </section> -->
-        <!-- token-area-end -->
-
-        <!-- section-divider -->
-        <div class="section-divider">
-            <div class="container">
-                <span></span>
-            </div>
-        </div>
-        <!-- section-divider-end -->
+        </section>
+        <!-- creators-area-end -->
 
         <!-- work-area -->
         <section id="work" class="work__area section-py-120">
             <div class="container">
                 <div class="row justify-content-center">
+                    <div class="col-lg-8">
                         <div class="section__title text-center mb-80">
-                            <span class="sub-title">simple process</span>
-                            <h2 class="title">3-Step <span>Process</span></h2>
+                            <span class="sub-title">Simple Process</span>
+                            <h2 class="title">From Idea to Income in <span>4 Simple Steps</span></h2>
+                            <p>Our streamlined process gets you from concept to earning in just minutes, not months.</p>
                         </div>
+                    </div>
                 </div>
                 <div class="work__item-wrap">
-                    <div class="work__img">
-                        <img src="assets/img/images/work_img.png" alt="img" class="alltuchtopdown">
-                    </div>
                     <div class="row">
                         <div class="col-lg-6" data-aos="fade-right" data-aos-delay="0">
-                            <div class="work__item">
-                                <h1 class="number">01</h1>
-                                <h4 class="title">Launch <span>Token</span></h4>
-                                <p>Create your token with custom metadata, tokenomics, and initial supply. Deploy instantly on Solana with just a few clicks using our intuitive interface.</p>
+                            <div class="work__item text-center">
+                                <div class="step-number">01</div>
+                                <h4 class="title">Sign <span>Up</span></h4>
+                                <p>Create your creator account and tell us about your work and community.</p>
                             </div>
-                            <div class="work__item mb-0">
-                                <h1 class="number">02</h1>
-                                <h4 class="title">Monitor <span>Progress</span></h4>
-                                <p>Track your bonding curve pool in real-time. View liquidity, trading volume, and price progression as your token gains momentum and community support.</p>
+                            <div class="work__item text-center">
+                                <div class="step-number">02</div>
+                                <h4 class="title">Design Your <span>Token</span></h4>
+                                <p>Customize your token name, supply, and utility. Set up rewards and exclusive perks.</p>
                             </div>
                         </div>
                         <div class="col-lg-6" data-aos="fade-left" data-aos-delay="0">
-                            <div class="work__item work__item-right">
-                                <h1 class="number">03</h1>
-                                <h4 class="title">Trade <span>Tokens</span></h4>
-                                <p>Buy and sell tokens with optimal pricing and seamless wallet integration. Experience low fees and instant transactions on Solana.</p>
+                            <div class="work__item text-center">
+                                <div class="step-number">03</div>
+                                <h4 class="title"><span>Launch</span></h4>
+                                <p>Deploy your token to the blockchain and start your community campaign.</p>
                             </div>
-                            <div class="work__item work__item-right mb-0">
-                                <h1 class="number">04</h1>
-                                <h4 class="title">Custom <span>Metadata</span></h4>
-                                <p>Configurable tokenomics and supply with instant Solana deployment.</p>
+                            <div class="work__item text-center">
+                                <div class="step-number">04</div>
+                                <h4 class="title">Grow & <span>Earn</span></h4>
+                                <p>Engage your fans, distribute rewards, and watch your community and revenue grow.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="work__shape">
-                <img src="assets/img/images/features_shape.png" alt="shape">
             </div>
         </section>
         <!-- work-area-end -->
 
-        <!-- exchange-area -->
-        <section class="exchange__area section-pb-120" data-aos="fade-up" data-aos-delay="0">
+        <!-- stats-area -->
+        <section id="stats" class="exchange__area section-py-120" data-aos="fade-up" data-aos-delay="0">
             <div class="container">
-                <div class="exchange__inner-wrap">
-                    <div class="exchange__content">
-                        <div class="icon">
-                            <img src="assets/img/images/exchange_img.png" alt="img">
-                        </div>
-                        <div class="content">
-                            <h4 class="title">Solana <span>Blockchain</span></h4>
-                            <p>Launch and trade tokens on the fastest blockchain with low fees and instant transactions.</p>
-                        </div>
-                    </div>
-                    <div class="exchange__icons">
-                        <ul class="list-wrap">
-                            <li><img src="assets/img/icon/exchange_icon01.svg" alt="icon"></li>
-                            <li><img src="assets/img/icon/exchange_icon02.svg" alt="icon"></li>
-                            <li><img src="assets/img/icon/exchange_icon03.svg" alt="icon"></li>
-                            <li><img src="assets/img/icon/exchange_icon04.svg" alt="icon"></li>
-                        </ul>
-                    </div>
+                <div class="text-center mb-60">
+                    <h2 class="title" style="color: #fff; margin-bottom: 20px;">Ready to Turn Your Passion Into Profit?</h2>
+                    <p style="color: #ccc; font-size: 1.2rem; margin-bottom: 40px;">Join thousands of creators who are already building sustainable income through community tokens. Your fanbase is waiting.</p>
                 </div>
-            </div>
-        </section>
-        <!-- exchange-area-end -->
 
-        <!-- crypto-area -->
-        <section class="crypto__area section-py-120">
-            <div class="container">
-                <div class="row justify-content-center">
-                        <div class="section__title text-center mb-80">
-                            <span class="sub-title">token launch</span>
-                            <h2 class="title">Launch your <span>token</span> <br> on Solana.</h2>
-                        </div>
-                </div>
-                <div class="row gutter-y-30 justify-content-center">
+                <div class="row gutter-y-30 mb-60">
                     <div class="col-lg-4 col-md-6">
-                        <div class="crypto__item">
-                            <div class="crypto__icon">
-                                <img src="assets/img/icon/crypto_icon01.svg" alt="icon">
-                            </div>
-                            <div class="crypto__content">
-                                <h2 class="title">Access your <span>dashboard</span></h2>
-                                <a href="/dashboard" target="_parent" class="tg-btn tg-btn-two">OPEN DASHBOARD</a>
-                            </div>
+                        <div class="creator-stat">
+                            <h3>10K+</h3>
+                            <p>Active Creators</p>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6">
-                        <div class="crypto__item">
-                            <div class="crypto__icon">
-                                <img src="assets/img/icon/crypto_icon02.svg" alt="icon">
-                            </div>
-                            <div class="crypto__content">
-                                <h2 class="title">View <span>featured</span> tokens</h2>
-                                <a href="/featured" target="_parent" class="tg-btn tg-btn-two">BROWSE FEATURED</a>
-                            </div>
+                        <div class="creator-stat">
+                            <h3>$2M+</h3>
+                            <p>Creator Earnings</p>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6">
-                        <div class="crypto__item">
-                            <div class="crypto__icon">
-                                <img src="assets/img/icon/crypto_icon03.svg" alt="icon">
-                            </div>
-                            <div class="crypto__content">
-                                <h2 class="title">Trade <span>tokens</span></h2>
-                                <a href="/featured" target="_parent" class="tg-btn tg-btn-two">START TRADING</a>
-                            </div>
+                        <div class="creator-stat">
+                            <h3>500+</h3>
+                            <p>Tokens Launched</p>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="crypto__shape">
-                <img src="assets/img/images/features_shape.png" alt="shape">
-            </div>
-        </section>
-        <!-- crypto-area-end -->
 
-        <!-- faq-area -->
-        <section class="faq__area section-py-120">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-lg-6">
-                        <div class="faq__img" data-aos="fade-right" data-aos-delay="0">
-                            <img src="assets/img/images/faq_img.png" alt="img">
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="faq__content" data-aos="fade-left" data-aos-delay="0">
-                            <div class="section__title mb-60">
-                                <span class="sub-title">faq & ans</span>
-                                <h2 class="title">Frequently <span>asked</span> <br> questions</h2>
-                            </div>
-                            <div class="faq__wrap">
-                                <div class="accordion" id="accordionExample">
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                                What is a bonding curve?
-                                            </button>
-                                        </h2>
-                                        <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
-                                            <div class="accordion-body">
-                                                <p>A bonding curve is a mathematical curve that defines the relationship between the price and supply of a token, allowing for fair and automated token distribution.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                                How do I launch a token?
-                                            </button>
-                                        </h2>
-                                        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                                            <div class="accordion-body">
-                                                <p>Simply connect your wallet, enter your token details, and deploy instantly on Solana with our automated tools.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                                What is Solana?
-                                            </button>
-                                        </h2>
-                                        <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                                            <div class="accordion-body">
-                                                <p>Solana is a high-performance blockchain known for its speed, low fees, and scalability, perfect for token launches and trading.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div class="text-center">
+                    <a href="/dashboard" target="_parent" class="tg-btn" style="margin-right: 20px; padding: 15px 35px;">Start Your Journey</a>
+                    <a href="#" class="tg-btn-outline" style="padding: 15px 35px;">Book a Demo</a>
+                </div>
+
+                <div class="text-center mt-40">
+                    <p style="color: #888; margin-bottom: 20px;">No setup fees • Launch in minutes • 24/7 support</p>
+                    <div class="d-flex justify-content-center flex-wrap">
+                        <span style="color: rgb(215,231,40); margin: 0 15px;">🔒 Blockchain Secured</span>
+                        <span style="color: rgb(215,231,40); margin: 0 15px;">⚡ Instant Deployment</span>
+                        <span style="color: rgb(215,231,40); margin: 0 15px;">🌍 Global Access</span>
+                        <span style="color: rgb(215,231,40); margin: 0 15px;">📱 Mobile Friendly</span>
                     </div>
                 </div>
             </div>
         </section>
-        <!-- faq-area-end -->
-
-        <!-- section-divider -->
-        <div class="section-divider">
-            <div class="container">
-                <span></span>
-            </div>
-        </div>
-        <!-- section-divider-end -->
-
-        <!-- roadmap-area -->
-        <section id="roadmap" class="roadmap__area section-py-120">
-            <div class="container">
-                <div class="row justify-content-center">
-                        <div class="section__title text-center mb-80" data-aos="fade-up" data-aos-delay="0">
-                            <span class="sub-title">roadmap</span>
-                            <h2 class="title">Launchpad <span>Development</span> Roadmap</h2>
-                        </div>
-                </div>
-                <div class="roadmap__item-wrap" data-aos="fade-up" data-aos-delay="300">
-                    <div class="row gutter-y-40">
-                        <div class="col-lg-3 col-md-6">
-                            <div class="roadmap__item">
-                                <div class="roadmap__icon">
-                                    <img src="assets/img/icon/roadmap_icon01.png" alt="icon">
-                                </div>
-                                <div class="roadmap__content">
-                                    <h3 class="title">Q1 2025</h3>
-                                    <p>Launch platform with bonding curve pools</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div class="roadmap__item">
-                                <div class="roadmap__icon">
-                                    <img src="assets/img/icon/roadmap_icon02.png" alt="icon">
-                                </div>
-                                <div class="roadmap__content">
-                                    <h3 class="title">Q2 2025</h3>
-                                    <p>Add real-time analytics and monitoring</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div class="roadmap__item">
-                                <div class="roadmap__icon">
-                                    <img src="assets/img/icon/roadmap_icon03.png" alt="icon">
-                                </div>
-                                <div class="roadmap__content">
-                                    <h3 class="title">Q3 2025</h3>
-                                    <p>Integrate token swap functionality</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6">
-                            <div class="roadmap__item">
-                                <div class="roadmap__icon">
-                                    <img src="assets/img/icon/roadmap_icon04.png" alt="icon">
-                                </div>
-                                <div class="roadmap__content">
-                                    <h3 class="title">Q4 2025</h3>
-                                    <p>Expand to multiple blockchains</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="roadmap__shape">
-                <img src="assets/img/images/features_shape.png" alt="shape">
-            </div>
-        </section>
-        <!-- roadmap-area-end -->
-
-        <!-- team-area -->
-        <section class="team__area section-py-120">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xl-6 col-lg-5">
-                        <div class="team__content-wrap">
-                            <p>Meet the team behind sprkclub.fun, dedicated to empowering creators with seamless token launches on Solana.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-6 col-lg-7">
-                        <div class="team__item-wrap">
-                            <div class="row gutter-y-30">
-                                <!-- Team members removed as requested -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="team__shape">
-                <img src="assets/img/images/features_shape.png" alt="shape">
-            </div>
-        </section>
-        <!-- team-area-end -->
+        <!-- stats-area-end -->
 
     </main>
     <!-- main-area-end -->
@@ -639,46 +466,74 @@
     <footer class="footer__area">
         <div class="container">
             <div class="footer__top">
-                <div class="row justify-content-center">
-                    <div class="col-lg-8">
-                        <div class="footer__content">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="footer__widget">
                             <div class="footer__logo">
-                                <a href="index.html"><img src="assets/img/SPRKCLUB.FUN.png" alt="logo" width="150" height="50"></a>
+                                <a href="index.html"><img src="assets/img/SPRKCLUB.FUN.png" alt="sprkclub.fun" width="150" height="50"></a>
                             </div>
-                            <span class="sub-title">sprkclub.fun LAUNCHPAD</span>
-                            <h2 class="title">Join with our <span>launchpad</span> for token creation</h2>
+                            <p>Empowering creators to build sustainable communities through tokenization. Turn your passion into profit with blockchain technology.</p>
                             <div class="team__social-wrap">
                                 <ul class="list-wrap">
-                                    <li>
-                                        <a href="#!">
-                                            <div class="shape">
-                                                <img src="assets/img/icon/icons_bg.svg" alt="shape">
-                                            </div>
-                                            <img src="assets/img/icon/twitter.svg" alt="icon" class="icon">
-                                        </a>
-                                    </li>
+                                    <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                                    <li><a href="#"><i class="fab fa-discord"></i></a></li>
+                                    <li><a href="#"><i class="fab fa-telegram"></i></a></li>
                                 </ul>
                             </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6">
+                        <div class="footer__widget">
+                            <h4 class="footer__widget-title">Product</h4>
+                            <ul class="footer__links">
+                                <li><a href="#features">Features</a></li>
+                                <li><a href="#work">How it Works</a></li>
+                                <li><a href="/featured" target="_parent">Featured Tokens</a></li>
+                                <li><a href="#creators">For Creators</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6">
+                        <div class="footer__widget">
+                            <h4 class="footer__widget-title">Support</h4>
+                            <ul class="footer__links">
+                                <li><a href="#">Documentation</a></li>
+                                <li><a href="#">Help Center</a></li>
+                                <li><a href="#">Contact Us</a></li>
+                                <li><a href="#">Status</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6">
+                        <div class="footer__widget">
+                            <h4 class="footer__widget-title">Legal</h4>
+                            <ul class="footer__links">
+                                <li><a href="#">Privacy Policy</a></li>
+                                <li><a href="#">Terms of Service</a></li>
+                                <li><a href="#">Cookie Policy</a></li>
+                                <li><a href="#">Disclaimer</a></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="footer__bottom">
-                <div class="copyright-text">
-                    <p>Copyright & design by sprkclub.fun - 2025</p>
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="copyright-text">
+                            <p>© 2025 sprkclub.fun. All rights reserved.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="footer__bottom-right text-end">
+                            <span style="color: #666;">Built on blockchain • Powered by innovation • Made for creators</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="footer__shape">
-            <img src="assets/img/images/footer_shape01.png" alt="shape" class="alltuchtopdown">
-            <img src="assets/img/images/footer_shape02.png" alt="shape" class="alltuchtopdown">
-        </div>
     </footer>
     <!-- footer-area-end -->
-
-
-
-
 
     <!-- JS here -->
     <script src="assets/js/vendor/jquery-3.6.0.min.js"></script>

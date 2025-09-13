@@ -11,25 +11,31 @@ interface GlobalMongo {
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
+// Ultra-fast connection settings optimized for speed
+const connectionOptions = {
+  maxPoolSize: 50, // Much larger pool for concurrent requests
+  minPoolSize: 10, // More minimum connections ready
+  serverSelectionTimeoutMS: 1000, // Even faster server selection
+  socketTimeoutMS: 2000, // Shorter socket timeout
+  connectTimeoutMS: 1000, // Faster initial connection
+  maxIdleTimeMS: 30000, // Keep connections alive longer
+  heartbeatFrequencyMS: 2000, // More frequent health checks
+  retryWrites: true, // Enable retry writes
+  retryReads: true, // Enable retry reads
+  readPreference: 'primaryPreferred', // Prefer primary but allow secondary
+  writeConcern: { w: 1, j: false }, // Faster writes without journaling wait
+  readConcern: { level: 'local' }, // Faster reads
+};
+
 if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable so the MongoClient is not constantly re-initialized
   const globalWithMongo = global as GlobalMongo;
   if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(MONGODB_URI, {
-      maxPoolSize: 10, // Maintain up to 10 socket connections
-      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
-      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-    });
+    client = new MongoClient(MONGODB_URI, connectionOptions);
     globalWithMongo._mongoClientPromise = client.connect();
   }
   clientPromise = globalWithMongo._mongoClientPromise;
 } else {
-  // In production mode, it's best to not use a global variable
-  client = new MongoClient(MONGODB_URI, {
-    maxPoolSize: 10,
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-  });
+  client = new MongoClient(MONGODB_URI, connectionOptions);
   clientPromise = client.connect();
 }
 
