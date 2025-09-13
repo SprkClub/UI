@@ -22,9 +22,6 @@ const connectionOptions = {
   heartbeatFrequencyMS: 2000, // More frequent health checks
   retryWrites: true, // Enable retry writes
   retryReads: true, // Enable retry reads
-  readPreference: 'primaryPreferred', // Prefer primary but allow secondary
-  writeConcern: { w: 1, j: false }, // Faster writes without journaling wait
-  readConcern: { level: 'local' }, // Faster reads
 };
 
 if (process.env.NODE_ENV === 'development') {

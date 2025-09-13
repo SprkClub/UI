@@ -2,7 +2,9 @@
 const nextConfig = {
   // Performance optimizations
   compress: true, // Enable gzip compression
-  swcMinify: true, // Use SWC for minification (faster)
+
+  // Output file tracing root to silence warning
+  outputFileTracingRoot: __dirname,
 
   // Image optimization
   images: {
@@ -12,17 +14,20 @@ const nextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
+  // External packages for server components
+  serverExternalPackages: ['mongodb'],
+
   // Experimental features for better performance
   experimental: {
-    serverComponentsExternalPackages: ['mongodb'],
-    optimizeCss: true,
     optimizePackageImports: ['@solana/web3.js', '@solana/wallet-adapter-react'],
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  },
+
+  // Turbo configuration
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },

@@ -7,7 +7,7 @@ interface CacheEntry<T> {
 }
 
 class SuperFastCache {
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
   private maxSize = 1000; // Maximum cache entries
   private defaultTTL = 60000; // 1 minute default
 
@@ -25,7 +25,7 @@ class SuperFastCache {
 
     // Increment hit counter
     entry.hits++;
-    return entry.data;
+    return entry.data as T;
   }
 
   // Set cache data with TTL
@@ -127,7 +127,7 @@ export function getCachedOrFetch<T>(
   fetchFn: () => Promise<T>,
   ttl?: number
 ): Promise<T> {
-  return new Promise(async (resolve, reject) => {
+  return new Promise<T>(async (resolve, reject) => {
     try {
       // Try cache first
       const cached = cacheInstance.get<T>(key);
@@ -147,7 +147,7 @@ export function getCachedOrFetch<T>(
 }
 
 // Background cache warming
-export function warmCache(keys: string[], fetchFns: (() => Promise<any>)[]): void {
+export function warmCache(keys: string[], fetchFns: (() => Promise<unknown>)[]): void {
   keys.forEach(async (key, index) => {
     try {
       if (fetchFns[index]) {

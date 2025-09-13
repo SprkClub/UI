@@ -24,6 +24,9 @@ export async function GET() {
       );
     }
 
+    // Use advanced caching system
+    const cacheKey = cacheKeys.referral(session.user.username);
+
     const referralData = await getCachedOrFetch(
       apiCache,
       cacheKey,
@@ -32,7 +35,7 @@ export async function GET() {
 
         // Fast database query with optimized projection
         let data = await referralsCollection.findOne(
-          { username: session.user.username },
+          { username: session.user.username! },
           {
             projection: {
               username: 1,
@@ -46,9 +49,9 @@ export async function GET() {
 
         // Create referral record if doesn't exist
         if (!data) {
-          const referralCode = generateReferralCode(session.user.username);
+          const referralCode = generateReferralCode(session.user.username!);
           const newReferral = {
-            username: session.user.username,
+            username: session.user.username!,
             referralCode,
             referredUsers: [],
             totalReferred: 0,
@@ -57,14 +60,14 @@ export async function GET() {
             updatedAt: new Date()
           };
 
-          await referralsCollection.insertOne(newReferral);
-          data = newReferral;
+          const result = await referralsCollection.insertOne(newReferral);
+          data = { ...newReferral, _id: result.insertedId };
         }
 
         return {
           username: data.username,
           referralCode: data.referralCode,
-          referredUsers: (data.referredUsers || []).map((user: any) => ({
+          referredUsers: (data.referredUsers || []).map((user: { username: string; referredAt: Date }) => ({
             username: user.username,
             referredAt: user.referredAt,
             tokensPurchased: 0 // Skip expensive counting for speed
