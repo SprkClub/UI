@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: __dirname,
   serverExternalPackages: [
     '@solana/web3.js',
     '@meteora-ag/dynamic-bonding-curve-sdk',

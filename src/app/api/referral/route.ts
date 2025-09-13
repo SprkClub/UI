@@ -5,7 +5,12 @@ import { getReferralsCollection, getTokensCollection } from '@/lib/mongodb';
 import crypto from 'crypto';
 
 // Cache for referral data
-const referralCache = new Map<string, { data: any; timestamp: number }>();
+interface CacheData {
+  data: Record<string, unknown>;
+  timestamp: number;
+}
+
+const referralCache = new Map<string, CacheData>();
 const CACHE_TTL = 60000; // 1 minute cache for referral data
 
 function getCachedReferralData(key: string) {
@@ -16,7 +21,7 @@ function getCachedReferralData(key: string) {
   return null;
 }
 
-function setCachedReferralData(key: string, data: any) {
+function setCachedReferralData(key: string, data: Record<string, unknown>) {
   referralCache.set(key, { data, timestamp: Date.now() });
 }
 
@@ -75,7 +80,7 @@ export async function GET() {
     }
 
     // Optimize: Use aggregation pipeline to get token counts efficiently
-    const referredUsernames = referralData?.referredUsers?.map((u: any) => u.username) || [];
+    const referredUsernames = referralData?.referredUsers?.map((u: { username: string }) => u.username) || [];
     
     let tokenCounts: { [key: string]: number } = {};
     if (referredUsernames.length > 0) {
@@ -93,14 +98,14 @@ export async function GET() {
         }
       ]).toArray();
       
-      tokenCounts = tokenCountsResult.reduce((acc: any, item: any) => {
-        acc[item._id] = item.count;
+      tokenCounts = tokenCountsResult.reduce((acc: { [key: string]: number }, item) => {
+        acc[item._id as string] = item.count as number;
         return acc;
-      }, {});
+      }, {} as { [key: string]: number });
     }
 
     // Build referred users with token counts
-    const referredUsers = (referralData?.referredUsers || []).map((referredUser: any) => ({
+    const referredUsers = (referralData?.referredUsers || []).map((referredUser: { username: string; [key: string]: unknown }) => ({
       ...referredUser,
       tokensPurchased: tokenCounts[referredUser.username] || 0
     }));

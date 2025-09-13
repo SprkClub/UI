@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTokensCollection, getReferralsCollection } from '@/lib/mongodb';
 
 // Cache for frequently accessed data
-const tokenCache = new Map<string, { data: any; timestamp: number }>();
+interface TokenCacheData {
+  data: Record<string, unknown>[];
+  timestamp: number;
+}
+
+const tokenCache = new Map<string, TokenCacheData>();
 const CACHE_TTL = 30000; // 30 seconds cache
 
 function getCachedData(key: string) {
@@ -13,7 +18,7 @@ function getCachedData(key: string) {
   return null;
 }
 
-function setCachedData(key: string, data: any) {
+function setCachedData(key: string, data: Record<string, unknown>[]) {
   tokenCache.set(key, { data, timestamp: Date.now() });
 }
 
@@ -118,13 +123,13 @@ export async function POST(request: NextRequest) {
       setImmediate(async () => {
         try {
           await referralsCollection.updateOne(
-            { 'referredUsers.username': tokenData.twitterAuth.username },
-            { 
+            { 'referredUsers.username': tokenData.twitterAuth?.username },
+            {
               $inc: { 'referredUsers.$.tokensPurchased': 1 },
               $set: { updatedAt: new Date() }
             }
           );
-          console.log(`Updated referral tracking for user ${tokenData.twitterAuth.username}`);
+          console.log(`Updated referral tracking for user ${tokenData.twitterAuth?.username}`);
         } catch (referralError) {
           console.error('Error updating referral data:', referralError);
         }
